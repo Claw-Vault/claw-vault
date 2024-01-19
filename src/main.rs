@@ -4,11 +4,12 @@ use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Router;
-use serde::{Deserialize, Serialize};
 use tower_http::trace::TraceLayer;
 use tracing::Span;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 mod routes;
 
@@ -19,12 +20,17 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    // Prepare swagger
+    let swagger =
+        SwaggerUi::new("/swagger").url("/api-doc/openapi.json", routes::ApiDoc::openapi());
+
     // build our application with a route
     // bind routes
     let app = routes::bind_routes(Router::new())
+        .merge(swagger)
         .layer(
             TraceLayer::new_for_http()
-                .on_request(|request: &Request<_>, _: &Span| tracing::info!("Intercepted "))
+                .on_request(|_: &Request<_>, _: &Span| tracing::info!("Intercepted "))
                 .on_response(|response: &Response, latency: Duration, _: &Span| {
                     tracing::info!(
                         "Completed with status {} in {} ms",
