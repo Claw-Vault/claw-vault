@@ -14,3 +14,8 @@ tracing = "0.1"
 tracing-subscriber = "0.3"
 utoipa = { version = "4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+uuid = { version = "1.7.0", features = ["v4"] }
+openssl = { version = "0.10", features = ["vendored"] }
+rand = "0.8.5"
+base64 = "0.21.7"
+md5 = "0.7.0"

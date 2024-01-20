@@ -1,9 +1,10 @@
 use std::time::Duration;
 
+use crate::service::cipher;
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use axum::Router;
+use axum::{Extension, Router};
 use tower_http::trace::TraceLayer;
 use tracing::Span;
 use tracing_subscriber::layer::SubscriberExt;
@@ -12,6 +13,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 mod routes;
+mod service;
 
 #[tokio::main]
 async fn main() {
@@ -28,6 +30,7 @@ async fn main() {
     // bind routes
     let app = routes::bind_routes(Router::new())
         .merge(swagger)
+        .layer(Extension(cipher::Cipher::new()))
         .layer(
             TraceLayer::new_for_http()
                 .on_request(|_: &Request<_>, _: &Span| tracing::info!("Intercepted "))

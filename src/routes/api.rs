@@ -1,5 +1,5 @@
-use axum::routing::post;
 use axum::{Json, Router};
+use axum::routing::post;
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
