@@ -1,8 +1,9 @@
 use base64::Engine;
 use openssl::rsa::{Padding, Rsa};
 
-enum CipherError {
+pub enum CipherError {
     KeyPairGenErr,
+    PubKeyPairGenErr,
     PubKeyErr,
     EncryptErr,
     EncodeErr,
@@ -14,6 +15,7 @@ impl CipherError {
     fn as_str(&self) -> &'static str {
         match self {
             CipherError::KeyPairGenErr => "Failed to generate RSA key pair",
+            CipherError::PubKeyPairGenErr => "Failed to generate RSA from public key",
             CipherError::PubKeyErr => "Failed to get public key",
             CipherError::EncryptErr => "Failed to encrypt the data",
             CipherError::EncodeErr => "Failed to encode the data",
@@ -24,7 +26,7 @@ impl CipherError {
 }
 
 #[derive(Clone)]
-pub(crate) struct Cipher {
+pub struct Cipher {
     base64_engine: base64::engine::GeneralPurpose,
 }
 
@@ -55,12 +57,12 @@ impl Cipher {
     }
 
     pub fn encrypt(self, data: String) -> Result<(String, String), CipherError> {
-        let data = data.as_bytes();
         let rsa = match Rsa::generate(Cipher::RSA_BITS) {
             Ok(rsa) => rsa,
             Err(_) => return Err(CipherError::KeyPairGenErr),
         };
 
+        let data = data.as_bytes();
         let mut encrypted = vec![0; rsa.size() as usize];
         match rsa.private_encrypt(data, &mut encrypted, Padding::PKCS1) {
             Ok(_) => (),
@@ -78,5 +80,30 @@ impl Cipher {
             )),
             Err(_) => Err(CipherError::PubKeyErr),
         }
+    }
+
+    pub fn decrypt(self, pub_pem: String, data: String) -> Result<String, CipherError> {
+        let rsa = match Rsa::public_key_from_pem(pub_pem.as_bytes()) {
+            Ok(rsa) => rsa,
+            Err(_) => return Err(CipherError::PubKeyPairGenErr),
+        };
+
+        let data = match self.decode_string(data.as_bytes()) {
+            Ok(data) => data,
+            Err(_) => return Err(CipherError::DecodeErr),
+        };
+
+        let mut decrypted = vec![0u8; data.len()];
+        match rsa.public_decrypt(data.as_slice(), &mut decrypted, Padding::PKCS1) {
+            Ok(_) => (),
+            Err(_) => return Err(CipherError::DecryptErr),
+        };
+
+        let decrypted = match String::from_utf8(decrypted) {
+            Ok(data) => data,
+            Err(_) => return Err(CipherError::DecryptErr),
+        };
+
+        Ok(String::from(decrypted.trim_matches(char::from(0))))
     }
 }

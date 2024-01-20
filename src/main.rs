@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::service::cipher;
+use crate::core::cipher;
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
@@ -12,8 +12,8 @@ use tracing_subscriber::util::SubscriberInitExt;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
+mod core;
 mod routes;
-mod service;
 
 #[tokio::main]
 async fn main() {
