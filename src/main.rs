@@ -7,7 +7,6 @@ use axum::response::{IntoResponse, Response};
 use axum::{Extension, Router};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tower_http::trace::TraceLayer;
-use tracing::log::LevelFilter;
 use tracing::Span;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;

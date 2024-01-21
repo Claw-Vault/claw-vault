@@ -6,10 +6,16 @@ pub mod health;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(health::health, crate::handlers::api::encrypt),
+    paths(
+        health::health,
+        crate::handlers::api::encrypt,
+        crate::handlers::api::decrypt
+    ),
     components(schemas(
         crate::core::dto::EncryptQueryBody,
         crate::core::dto::EncryptResponse,
+        crate::core::dto::DecryptQueryBody,
+        crate::core::dto::DecryptResponse,
         crate::core::dto::ErrorMessage
     ))
 )]

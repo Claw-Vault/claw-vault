@@ -25,6 +25,10 @@ impl CipherError {
             CipherError::DecryptErr => "Failed to decrypt the data",
         }
     }
+
+    pub fn to_string(&self) -> String {
+        String::from(self.as_str())
+    }
 }
 
 #[derive(Clone)]
@@ -69,6 +73,19 @@ impl Cipher {
         Ok(pem)
     }
 
+    pub fn decrypt_pem(&self, key: &Uuid, pem: String) -> Result<Vec<u8>, CipherError> {
+        let xrc = match XORCryptor::new(&key.to_string()) {
+            Ok(xrc) => xrc,
+            Err(_) => return Err(CipherError::XrcInitFailed),
+        };
+
+        let pem = match self.decode_string(pem.as_bytes()) {
+            Ok(pem) => pem,
+            Err(_) => return Err(CipherError::DecodeErr),
+        };
+        Ok(xrc.decrypt_vec(pem))
+    }
+
     pub fn encrypt(&self, data: String) -> Result<(String, String), CipherError> {
         let rsa = match Rsa::generate(Cipher::RSA_BITS) {
             Ok(rsa) => rsa,
@@ -93,8 +110,8 @@ impl Cipher {
         Ok((encrypted, pem))
     }
 
-    pub fn decrypt(&self, pub_pem: String, data: String) -> Result<String, CipherError> {
-        let rsa = match Rsa::public_key_from_pem(pub_pem.as_bytes()) {
+    pub fn decrypt(&self, pub_pem: Vec<u8>, data: String) -> Result<String, CipherError> {
+        let rsa = match Rsa::public_key_from_pem(&pub_pem) {
             Ok(rsa) => rsa,
             Err(_) => return Err(CipherError::PubKeyPairErr),
         };
