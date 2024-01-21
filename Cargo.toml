@@ -34,3 +34,7 @@ sea-orm = { version = "0.12", features = [
     "runtime-tokio-native-tls",
     "macros",
 ] }
+
+[profile.release]
+strip = true
+lto = true
