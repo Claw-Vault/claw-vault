@@ -68,16 +68,9 @@ pub struct ErrorMessage {
 }
 
 impl ErrorMessage {
-    pub fn bad_request(message: String) -> Self {
+    pub fn new(code: StatusCode, message: String) -> Self {
         ErrorMessage {
-            code: StatusCode::BAD_REQUEST.as_u16(),
-            message,
-        }
-    }
-
-    pub fn server_error(message: String) -> Self {
-        ErrorMessage {
-            code: StatusCode::INTERNAL_SERVER_ERROR.as_u16(),
+            code: code.as_u16(),
             message,
         }
     }
