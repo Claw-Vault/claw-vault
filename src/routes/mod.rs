@@ -1,13 +1,17 @@
 use axum::routing::Router;
 use utoipa::OpenApi;
 
-mod api;
-mod health;
+pub mod api;
+pub mod health;
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(health::health, api::encrypt),
-    components(schemas(api::EncryptQuery))
+    paths(health::health, crate::handlers::api::encrypt),
+    components(schemas(
+        crate::core::dto::EncryptQueryBody,
+        crate::core::dto::EncryptResponse,
+        crate::core::dto::ErrorMessage
+    ))
 )]
 pub struct ApiDoc;
 

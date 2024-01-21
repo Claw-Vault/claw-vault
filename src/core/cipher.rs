@@ -1,24 +1,26 @@
 use base64::Engine;
 use openssl::rsa::{Padding, Rsa};
+use uuid::Uuid;
+use xor_cryptor::XORCryptor;
 
 pub enum CipherError {
+    XrcInitFailed,
     KeyPairGenErr,
-    PubKeyPairGenErr,
+    PubKeyPairErr,
     PubKeyErr,
     EncryptErr,
-    EncodeErr,
     DecodeErr,
     DecryptErr,
 }
 
 impl CipherError {
-    fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
+            CipherError::XrcInitFailed => "Failed to initialize XORCryptor",
             CipherError::KeyPairGenErr => "Failed to generate RSA key pair",
-            CipherError::PubKeyPairGenErr => "Failed to generate RSA from public key",
+            CipherError::PubKeyPairErr => "Failed to generate RSA from public key",
             CipherError::PubKeyErr => "Failed to get public key",
             CipherError::EncryptErr => "Failed to encrypt the data",
-            CipherError::EncodeErr => "Failed to encode the data",
             CipherError::DecodeErr => "Failed to decode the data",
             CipherError::DecryptErr => "Failed to decrypt the data",
         }
@@ -42,13 +44,13 @@ impl Cipher {
         };
     }
 
-    fn encode_string(self, buf: &[u8]) -> String {
+    fn encode_string(&self, buf: &[u8]) -> String {
         let mut encoded_string = String::new();
         self.base64_engine.encode_string(buf, &mut encoded_string);
         return encoded_string;
     }
 
-    fn decode_string(self, buf: &[u8]) -> Result<Vec<u8>, CipherError> {
+    fn decode_string(&self, buf: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut decoded = Vec::<u8>::new();
         match self.base64_engine.decode_vec(buf, &mut decoded) {
             Ok(_) => Ok(decoded),
@@ -56,7 +58,18 @@ impl Cipher {
         }
     }
 
-    pub fn encrypt(self, data: String) -> Result<(String, String), CipherError> {
+    pub fn encrypt_pem(&self, key: &Uuid, pem: String) -> Result<String, CipherError> {
+        let xrc = match XORCryptor::new(&key.to_string()) {
+            Ok(xrc) => xrc,
+            Err(_) => return Err(CipherError::XrcInitFailed),
+        };
+
+        let encrypted = xrc.encrypt_vec(pem.as_bytes().to_vec());
+        let pem = self.encode_string(&encrypted);
+        Ok(pem)
+    }
+
+    pub fn encrypt(&self, data: String) -> Result<(String, String), CipherError> {
         let rsa = match Rsa::generate(Cipher::RSA_BITS) {
             Ok(rsa) => rsa,
             Err(_) => return Err(CipherError::KeyPairGenErr),
@@ -70,22 +83,20 @@ impl Cipher {
         };
 
         let encrypted = self.encode_string(encrypted.as_slice());
-        match rsa.public_key_to_pem() {
-            Ok(pub_key) => Ok((
-                encrypted,
-                match String::from_utf8(pub_key) {
-                    Ok(pem) => pem,
-                    Err(_) => return Err(CipherError::PubKeyErr),
-                },
-            )),
-            Err(_) => Err(CipherError::PubKeyErr),
-        }
+        let pem = match rsa.public_key_to_pem() {
+            Ok(pub_key) => match String::from_utf8(pub_key) {
+                Ok(pem) => pem,
+                Err(_) => return Err(CipherError::PubKeyErr),
+            },
+            Err(_) => return Err(CipherError::PubKeyErr),
+        };
+        Ok((encrypted, pem))
     }
 
-    pub fn decrypt(self, pub_pem: String, data: String) -> Result<String, CipherError> {
+    pub fn decrypt(&self, pub_pem: String, data: String) -> Result<String, CipherError> {
         let rsa = match Rsa::public_key_from_pem(pub_pem.as_bytes()) {
             Ok(rsa) => rsa,
-            Err(_) => return Err(CipherError::PubKeyPairGenErr),
+            Err(_) => return Err(CipherError::PubKeyPairErr),
         };
 
         let data = match self.decode_string(data.as_bytes()) {
@@ -105,5 +116,17 @@ impl Cipher {
         };
 
         Ok(String::from(decrypted.trim_matches(char::from(0))))
+    }
+
+    pub fn generate_id_hash(&self, data: &String) -> (String, String) {
+        let mut ctx = md5::Context::new();
+        let time = std::time::UNIX_EPOCH.elapsed().unwrap().as_millis();
+        let time = format!("{}", time);
+        ctx.consume(time.as_bytes());
+        ctx.consume(data.as_bytes());
+
+        let id = format!("{:x}", ctx.compute());
+        let hash = format!("{:x}", md5::compute(data.as_bytes()));
+        (id, hash)
     }
 }

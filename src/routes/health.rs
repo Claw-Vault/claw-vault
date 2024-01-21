@@ -7,7 +7,8 @@ pub fn bind_routes(router: Router) -> Router {
 #[utoipa::path(
     get, 
     path = "/health",
-    responses((status=200, description="Health check API"))
+    responses((status=200, description="Health check API")),
+    tag = "Health"
 )]
 pub async fn health() -> &'static str {
     "Server is up and running 🚀🚀"

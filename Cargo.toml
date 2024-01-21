@@ -1,5 +1,5 @@
 [package]
-name = "xrc-share"
+name = "claw-vault"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,15 +7,30 @@ edition = "2021"
 
 [dependencies]
 tokio = { version = "1.35.1", features = ["full"] }
+dotenv = "0.15.0"
+
+# http
 axum = "0.7.4"
 serde = { version = "1.0.195", features = ["derive"] }
 tower-http = { version = "0.5.1", features = ["trace"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+
+# swagger
 utoipa = { version = "4.2.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+
+# cryptography
 uuid = { version = "1.7.0", features = ["v4"] }
 openssl = { version = "0.10", features = ["vendored"] }
 rand = "0.8.5"
 base64 = "0.21.7"
 md5 = "0.7.0"
+xor_cryptor = "1.1.0"
+
+#db
+sea-orm = { version = "0.12", features = [
+    "sqlx-mysql",
+    "runtime-tokio-native-tls",
+    "macros",
+] }
