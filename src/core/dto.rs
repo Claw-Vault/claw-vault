@@ -12,11 +12,11 @@ pub trait RequestStruct<T> {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct EncryptQueryBody {
     value: String,
-    validity: u64,
+    validity: i32,
 }
 
-impl RequestStruct<(String, u64)> for EncryptQueryBody {
-    fn expand(self) -> (String, u64) {
+impl RequestStruct<(String, i32)> for EncryptQueryBody {
+    fn expand(self) -> (String, i32) {
         (self.value, self.validity)
     }
 }

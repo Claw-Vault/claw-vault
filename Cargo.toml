@@ -30,7 +30,7 @@ xor_cryptor = "1.1.0"
 
 #db
 sea-orm = { version = "0.12", features = [
-    "sqlx-mysql",
+    "sqlx-postgres",
     "runtime-tokio-native-tls",
     "macros",
 ] }

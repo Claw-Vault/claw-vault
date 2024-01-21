@@ -9,7 +9,7 @@ pub async fn save_claw(
     id: String,
     data: String,
     md5hash: String,
-    validity: u64,
+    validity: i32,
     db: &DatabaseConnection,
 ) -> Result<claw::Model, ErrorMessage> {
     let model = claw::ActiveModel {

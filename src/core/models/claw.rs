@@ -10,7 +10,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub data: String,
     pub md5hash: String,
-    pub validity: u64,
+    pub validity: i32,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
