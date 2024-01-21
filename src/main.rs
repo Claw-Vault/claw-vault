@@ -59,7 +59,8 @@ async fn main() {
         .fallback(fallback_handler);
 
     // run our app with hyper, listening globally on port 3000
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let addr = get_addr().await;
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, router).await.unwrap();
 }
@@ -76,6 +77,17 @@ async fn connect_db() -> DatabaseConnection {
     Database::connect(opts)
         .await
         .expect("Failed to connect database")
+}
+
+async fn get_addr() -> String {
+    let port = match std::env::var("PORT") {
+        Ok(port) => port,
+        Err(_) => {
+            tracing::info!("PORT was not provided, default to 3000");
+            String::from("3000")
+        }
+    };
+    format!("0.0.0.0:{}", port)
 }
 
 async fn fallback_handler() -> impl IntoResponse {
