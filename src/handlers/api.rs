@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use std::{ops::Deref, sync::Arc};
+use std::sync::Arc;
 
 use axum::Extension;
 use uuid::Uuid;
@@ -26,7 +26,7 @@ pub async fn encrypt(
     Json(encrypt_query): Json<dto::EncryptQueryBody>,
 ) -> Result<Json<dto::EncryptResponse>, AppError> {
     let (data, validity) = encrypt_query.expand();
-    let (cipher, db) = app.deref().clone().expand();
+    let (cipher, db, _) = app.expand();
 
     let uuid = Uuid::new_v4();
     let (id, md5hash) = cipher.generate_id_hash(&data);
@@ -67,7 +67,7 @@ pub async fn decrypt(
     Extension(app): Extension<Arc<App>>,
     Json(decrypt_query): Json<dto::DecryptQueryBody>,
 ) -> Result<Json<dto::DecryptResponse>, AppError> {
-    let (cipher, db) = app.deref().clone().expand();
+    let (cipher, db, _) = app.expand();
     let (id, key) = decrypt_query.expand();
 
     let claw = match dao::get_claw_by_id(id.clone(), &db).await {

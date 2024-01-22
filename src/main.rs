@@ -17,13 +17,14 @@ mod app;
 mod core;
 mod handlers;
 mod routes;
+mod tests;
 
 #[tokio::main]
 async fn main() {
     dotenv::dotenv().ok();
 
-    // Connect to database
-    let db = connect_db().await;
+    // initialize app
+    let app = initialize_app().await;
 
     // initialize tracing
     tracing_subscriber::registry()
@@ -33,9 +34,6 @@ async fn main() {
     // Prepare swagger
     let swagger =
         SwaggerUi::new("/swagger").url("/api-doc/openapi.json", routes::ApiDoc::openapi());
-
-    // initialize app
-    let app = Arc::new(app::App::new(db));
 
     // build our application with a route
     // bind routes
@@ -63,6 +61,12 @@ async fn main() {
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, router).await.unwrap();
+}
+
+async fn initialize_app() -> Arc<app::App> {
+    let db = connect_db().await;
+    let tera = tera::Tera::new("templates/**/*.html").expect("Failed to initialize templates");
+    Arc::new(app::App::new(db, tera))
 }
 
 async fn connect_db() -> DatabaseConnection {

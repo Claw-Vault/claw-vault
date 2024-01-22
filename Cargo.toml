@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 tokio = { version = "1.35.1", features = ["full"] }
 dotenv = "0.15.0"
+tera = "1.19.1"
 
 # http
 axum = { version = "0.7.4", features = ["macros"] }
