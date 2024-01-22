@@ -65,8 +65,14 @@ async fn main() {
 
 async fn initialize_app() -> Arc<app::App> {
     let db = connect_db().await;
-    let tera = tera::Tera::new("templates/**/*.html").expect("Failed to initialize templates");
+    let tera = setup_tera().await;
     Arc::new(app::App::new(db, tera))
+}
+
+async fn setup_tera() -> tera::Tera {
+    let template_dir = std::env::var("TEMPLATE_DIR").expect("TEMPLATE_DIR not set");
+    let template_dir = format!("{}/**/*.html", template_dir);
+    tera::Tera::new(&template_dir).expect("Failed to initialize Tera")
 }
 
 async fn connect_db() -> DatabaseConnection {
@@ -84,13 +90,10 @@ async fn connect_db() -> DatabaseConnection {
 }
 
 async fn get_addr() -> String {
-    let port = match std::env::var("PORT") {
-        Ok(port) => port,
-        Err(_) => {
-            tracing::info!("PORT was not provided, default to 3000");
-            String::from("3000")
-        }
-    };
+    let port = std::env::var("PORT").unwrap_or_else(|_| {
+        tracing::info!("PORT was not provided, default to 3000");
+        String::from("3000")
+    });
     format!("0.0.0.0:{}", port)
 }
 
