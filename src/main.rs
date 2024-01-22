@@ -6,6 +6,7 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Router};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
+use tokio::signal;
 use tower_http::trace::TraceLayer;
 use tracing::{Level, Span};
 use tracing_subscriber::layer::SubscriberExt;
@@ -44,7 +45,7 @@ async fn main() {
     // bind routes
     let router = routes::bind_routes(Router::new())
         .merge(swagger)
-        .layer(Extension(app))
+        .layer(Extension(app.clone()))
         .layer(
             TraceLayer::new_for_http()
                 .on_request(|req: &Request<_>, _: &Span| {
@@ -67,7 +68,10 @@ async fn main() {
     let addr = get_addr().await;
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
-    axum::serve(listener, router).await.unwrap();
+    axum::serve(listener, router)
+        .with_graceful_shutdown(shutdown_signal(app))
+        .await
+        .unwrap();
 }
 
 async fn initialize_app() -> Arc<app::App> {
@@ -106,4 +110,39 @@ async fn get_addr() -> String {
 
 async fn fallback_handler() -> impl IntoResponse {
     (StatusCode::UNAUTHORIZED, "Nothing to see here")
+}
+
+async fn shutdown_signal(app: Arc<app::App>) {
+    let (_, db, _) = app.expand();
+
+    let ctrl_c = async {
+        signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        signal::unix::signal(signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {terminate_app(db).await},
+        _ = terminate => {terminate_app(db).await},
+    }
+}
+
+async fn terminate_app(db: Arc<DatabaseConnection>) {
+    db.as_ref()
+        .to_owned()
+        .close()
+        .await
+        .expect("Failed to disconnect DB");
+    println!("Terminated App")
 }
