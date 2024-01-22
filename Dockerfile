@@ -7,6 +7,7 @@ COPY . .
 RUN apk add --no-cache musl-dev perl-utils make
 
 # Build the application
+RUN cargo test --release -- --nocapture --exact
 RUN cargo install --path .
 
 ARG DATABASE_URL
