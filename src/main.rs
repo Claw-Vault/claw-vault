@@ -47,7 +47,9 @@ async fn main() {
         .layer(Extension(app))
         .layer(
             TraceLayer::new_for_http()
-                .on_request(|_: &Request<_>, _: &Span| tracing::info!("Intercepted "))
+                .on_request(|req: &Request<_>, _: &Span| {
+                    tracing::info!("{} {}", req.method(), req.uri())
+                })
                 .on_response(|response: &Response, latency: Duration, _: &Span| {
                     tracing::info!(
                         "Completed with status {} in {} ms",

@@ -5,7 +5,7 @@ use crate::app::App;
 use super::dao;
 
 pub fn schedule_cleaner(app: Arc<App>) {
-    tokio::spawn(cleaner(app));
+    thread::spawn(|| cleaner(app));
 }
 
 async fn cleaner(app: Arc<App>) {
