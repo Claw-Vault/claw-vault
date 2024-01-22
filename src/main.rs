@@ -7,7 +7,7 @@ use axum::response::{IntoResponse, Response};
 use axum::{Extension, Router};
 use sea_orm::{ConnectOptions, Database, DatabaseConnection};
 use tower_http::trace::TraceLayer;
-use tracing::Span;
+use tracing::{Level, Span};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use utoipa::OpenApi;
@@ -21,15 +21,20 @@ mod tests;
 
 #[tokio::main]
 async fn main() {
+    // initialize tracing
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::from_default_env().add_directive(Level::INFO.into()))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    // load env
     dotenv::dotenv().ok();
 
     // initialize app
     let app = initialize_app().await;
 
-    // initialize tracing
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::fmt::layer())
-        .init();
+    // initialze cleaner
+    core::cleaner::schedule_cleaner(app.clone());
 
     // Prepare swagger
     let swagger =

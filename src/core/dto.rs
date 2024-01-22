@@ -12,11 +12,11 @@ pub trait RequestStruct<T> {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct EncryptQueryBody {
     value: String,
-    validity: i32,
+    validity: i64,
 }
 
-impl RequestStruct<(String, i32)> for EncryptQueryBody {
-    fn expand(self) -> (String, i32) {
+impl RequestStruct<(String, i64)> for EncryptQueryBody {
+    fn expand(self) -> (String, i64) {
         (self.value, self.validity)
     }
 }
@@ -39,13 +39,15 @@ impl RequestStruct<(String, String)> for DecryptQueryBody {
 pub struct EncryptResponse {
     data_id: String,
     key_id: String,
+    valid_for: String,
 }
 
 impl EncryptResponse {
-    pub fn new(data_id: String, key_id: Uuid) -> Self {
+    pub fn new(data_id: String, key_id: Uuid, valid_for: String) -> Self {
         EncryptResponse {
             data_id,
             key_id: key_id.to_string(),
+            valid_for,
         }
     }
 }

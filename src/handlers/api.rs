@@ -50,7 +50,7 @@ pub async fn encrypt(
         Err(err) => return Err(err),
     };
 
-    Ok(Json(dto::EncryptResponse::new(claw.id, uuid)))
+    Ok(Json(dto::EncryptResponse::new(claw.id, uuid, claw.validity.to_string())))
 }
 
 #[utoipa::path(

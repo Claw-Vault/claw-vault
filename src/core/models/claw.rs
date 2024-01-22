@@ -10,7 +10,37 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub data: String,
     pub md5hash: String,
-    pub validity: i32,
+    pub validity: ValidDuration,
+    pub created_at: DateTime,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, EnumIter, DeriveActiveEnum)]
+#[sea_orm(rs_type = "i64", db_type = "BigInteger")]
+pub enum ValidDuration {
+    #[sea_orm(num_value = 60)]
+    Minute = 60,
+    #[sea_orm(num_value = 900)]
+    QuarterHour = 900,
+    #[sea_orm(num_value = 1800)]
+    HalfHour = 1800,
+}
+
+impl ValidDuration {
+    pub fn from_i64(v: i64) -> Self {
+        match v {
+            900 => Self::QuarterHour,
+            1800 => Self::HalfHour,
+            _ => Self::Minute,
+        }
+    }
+
+    pub fn to_string(self) -> String {
+        match self {
+            ValidDuration::Minute => String::from("1 minute"),
+            ValidDuration::QuarterHour => String::from("15 minutes"),
+            ValidDuration::HalfHour => String::from("60 minutes"),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

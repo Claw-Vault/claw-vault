@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
 
 use crate::app::AppError;
@@ -8,14 +9,15 @@ pub async fn save_claw(
     id: String,
     data: String,
     md5hash: String,
-    validity: i32,
+    validity: i64,
     db: &DatabaseConnection,
 ) -> Result<claw::Model, AppError> {
     let model = claw::ActiveModel {
         id: Set(id),
         data: Set(data),
         md5hash: Set(md5hash),
-        validity: Set(validity),
+        validity: Set(claw::ValidDuration::from_i64(validity)),
+        created_at: Set(Utc::now().naive_utc()),
     };
     match model.insert(db).await {
         Ok(v) => Ok(v),
@@ -44,6 +46,13 @@ pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw:
             Some(model) => Ok(model),
             None => Err(AppError::BadRequest(String::from("No data for id"))),
         },
+        Err(err) => Err(AppError::DbError(err.to_string())),
+    }
+}
+
+pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, AppError> {
+    match claw::Entity::find().all(db).await {
+        Ok(claws) => Ok(claws),
         Err(err) => Err(AppError::DbError(err.to_string())),
     }
 }
