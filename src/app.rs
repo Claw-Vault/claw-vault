@@ -8,6 +8,14 @@ use axum::{
 };
 use sea_orm::DatabaseConnection;
 
+/// Struct to hold instances of common objects
+/// in app.
+///
+/// This struct is passed on to every API path.
+///
+/// All instances are hold in [`Arc`]
+/// to minimize cloning cost for every request
+/// being handled.
 #[derive(Clone)]
 pub struct App {
     cipher: Arc<cipher::Cipher>,
@@ -16,18 +24,29 @@ pub struct App {
 }
 
 impl App {
+    /// Initializes app with required objects
+    ///
+    /// Returns [`App`]
     pub async fn init() -> Arc<App> {
         let db = dao::connect_db().await;
         let tera = App::setup_tera().await;
         Arc::new(App::new(db, tera))
     }
 
+    /// Setup tera for html templates
+    ///
+    /// Expects `TEMPLATE_DIR` from env else panics
+    ///
+    /// Returns [`tera::Tera`]
     async fn setup_tera() -> tera::Tera {
         let template_dir = std::env::var("TEMPLATE_DIR").expect("TEMPLATE_DIR not set");
         let template_dir = format!("{}/**/*.html", template_dir);
         tera::Tera::new(&template_dir).expect("Failed to initialize Tera")
     }
 
+    /// Private constructor for [`App`]
+    ///
+    /// Takes in [`DatabaseConnection`] and [`tera::Tera`]
     fn new(db_conn: DatabaseConnection, tera: tera::Tera) -> Self {
         return App {
             cipher: Arc::new(cipher::Cipher::new()),
@@ -36,6 +55,8 @@ impl App {
         };
     }
 
+    /// This functions returns instances of the objects
+    /// held by the struct.
     pub fn expand(
         &self,
     ) -> (
@@ -46,6 +67,9 @@ impl App {
         return (self.cipher.clone(), self.db.clone(), self.tera.clone());
     }
 
+    /// Terminates the object that are required for graceful shutdown
+    ///
+    /// For now it closes [`DatabaseConnection`]
     pub async fn terminate(&self) {
         self.db
             .as_ref()
@@ -58,6 +82,10 @@ impl App {
     }
 }
 
+/// Custom Json wrapper handling json pyload
+/// parsing errors.
+///
+/// See more: [`axum::Json`]
 #[derive(FromRequest)]
 #[from_request(via(axum::Json), rejection(AppError))]
 pub struct Json<T>(pub T);
@@ -71,9 +99,16 @@ where
     }
 }
 
+/// Struct for rendering html templates
+///
+/// It takes in:
+/// - [`tera::Tera`]    : Template renderer
+/// - [`str`]           : Html file name
+/// - [`tera::Context`] : Context to bind variables to template
 pub struct HtmlTemplate(pub Arc<tera::Tera>, pub &'static str, pub tera::Context);
 
 impl IntoResponse for HtmlTemplate {
+    /// Function to render the provided template
     fn into_response(self) -> Response {
         match self.0.render(self.1, &self.2) {
             Ok(html) => Html(html).into_response(),
@@ -82,6 +117,7 @@ impl IntoResponse for HtmlTemplate {
     }
 }
 
+/// Enum for customize and handling errors
 pub enum AppError {
     BadRequest(String),
     InvalidBody(JsonRejection),
@@ -90,6 +126,7 @@ pub enum AppError {
 }
 
 impl IntoResponse for AppError {
+    /// Function to map errors into appropriate responses
     fn into_response(self) -> Response {
         let (status, message) = match self {
             AppError::InvalidBody(_) => (StatusCode::BAD_REQUEST, String::from("Invalid payload")),

@@ -5,6 +5,7 @@ mod api;
 mod health;
 mod web;
 
+/// Struct for [`OpenApi`] docs generation for [`utoipa_swagger_ui::SwaggerUi`]
 #[derive(OpenApi)]
 #[openapi(
     paths(
@@ -22,6 +23,10 @@ mod web;
 )]
 pub struct ApiDoc;
 
+/// Function to bind routes from:
+/// - [`health`]
+/// - [`api`]
+/// - [`web`]
 pub fn bind_routes(router: Router) -> Router {
     let router = health::bind_routes(router);
     let router = api::bind_routes(router);

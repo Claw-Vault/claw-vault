@@ -3,6 +3,7 @@ use openssl::rsa::{Padding, Rsa};
 use uuid::Uuid;
 use xor_cryptor::XORCryptor;
 
+/// Enum for handling errors related to [`Cipher`]
 pub enum CipherError {
     XrcInitFailed,
     KeyPairGenErr,
@@ -31,6 +32,11 @@ impl CipherError {
     }
 }
 
+/// Struct for handling cipher operations such as
+/// - encrypt
+/// - decrypt
+/// - pem
+/// - hash
 #[derive(Clone)]
 pub struct Cipher {
     base64_engine: base64::engine::GeneralPurpose,
@@ -48,12 +54,14 @@ impl Cipher {
         };
     }
 
+    /// Encodes array to base64 [`String`]
     fn encode_string(&self, buf: &[u8]) -> String {
         let mut encoded_string = String::new();
         self.base64_engine.encode_string(buf, &mut encoded_string);
         return encoded_string;
     }
 
+    /// Decode base64 array to [`Vec<u8>`]
     fn decode_string(&self, buf: &[u8]) -> Result<Vec<u8>, CipherError> {
         let mut decoded = Vec::<u8>::new();
         match self.base64_engine.decode_vec(buf, &mut decoded) {
@@ -62,6 +70,7 @@ impl Cipher {
         }
     }
 
+    /// Encrypts pem using [`XORCryptor`]
     pub fn encrypt_pem(&self, key: &Uuid, pem: String) -> Result<String, CipherError> {
         let xrc = match XORCryptor::new(&key.to_string()) {
             Ok(xrc) => xrc,
@@ -73,6 +82,7 @@ impl Cipher {
         Ok(pem)
     }
 
+    /// Decrypts pem using [`XORCryptor`]
     pub fn decrypt_pem(&self, key: &Uuid, pem: String) -> Result<Vec<u8>, CipherError> {
         let xrc = match XORCryptor::new(&key.to_string()) {
             Ok(xrc) => xrc,
@@ -86,6 +96,7 @@ impl Cipher {
         Ok(xrc.decrypt_vec(pem))
     }
 
+    /// Encrypts the data using [`Rsa`]
     pub fn encrypt(&self, data: String) -> Result<(String, String), CipherError> {
         let rsa = match Rsa::generate(Cipher::RSA_BITS) {
             Ok(rsa) => rsa,
@@ -110,6 +121,7 @@ impl Cipher {
         Ok((encrypted, pem))
     }
 
+    /// Decrypts the data using [`Rsa`] from `pub_pem`
     pub fn decrypt(&self, pub_pem: Vec<u8>, data: String) -> Result<String, CipherError> {
         let rsa = match Rsa::public_key_from_pem(&pub_pem) {
             Ok(rsa) => rsa,
@@ -135,6 +147,10 @@ impl Cipher {
         Ok(String::from(decrypted.trim_matches(char::from(0))))
     }
 
+    /// Generates `id` and `hash` from data
+    ///
+    /// `hash` is the [`md5`] hash of the data
+    /// `id` is the [`md5`] hash of the data + current time in millis
     pub fn generate_id_hash(&self, data: &String) -> (String, String) {
         let mut ctx = md5::Context::new();
         let time = std::time::UNIX_EPOCH.elapsed().unwrap().as_millis();

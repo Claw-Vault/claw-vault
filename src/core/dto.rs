@@ -3,12 +3,15 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-/// REQUEST
+// ----- REQUEST
 
+/// Trait that all request DTO's should implement
 pub trait RequestStruct<T> {
+    /// Function to return the objects stored in the struct
     fn expand(self) -> T;
 }
 
+/// DTO used for receiving body in [`crate::handlers::api::encrypt`]
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct EncryptQueryBody {
     value: String,
@@ -21,6 +24,7 @@ impl RequestStruct<(String, i64)> for EncryptQueryBody {
     }
 }
 
+/// DTO used for receiving body in [`crate::handlers::api::decrypt`]
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct DecryptQueryBody {
     id: String,
@@ -33,8 +37,9 @@ impl RequestStruct<(String, String)> for DecryptQueryBody {
     }
 }
 
-/// RESPONSE
+// ----- RESPONSE
 
+/// DTO used for response body in [`crate::handlers::api::encrypt`]
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct EncryptResponse {
     data_id: String,
@@ -52,6 +57,7 @@ impl EncryptResponse {
     }
 }
 
+/// DTO used for response body in [`crate::handlers::api::decrypt`]
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct DecryptResponse {
     data: String,
@@ -63,6 +69,7 @@ impl DecryptResponse {
     }
 }
 
+/// Error DTO used for response body in all APIs
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct ErrorMessage {
     code: u16,

@@ -7,6 +7,9 @@ use crate::app::AppError;
 
 use super::models::{claw, claw_keys};
 
+/// Function that connects db using `DATABASE_URL` from env
+///
+/// Panics when fails
 pub async fn connect_db() -> DatabaseConnection {
     let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
@@ -16,11 +19,15 @@ pub async fn connect_db() -> DatabaseConnection {
         .connect_timeout(Duration::from_secs(15))
         .sqlx_logging(false);
 
-    Database::connect(opts)
+    let connection = Database::connect(opts)
         .await
-        .expect("Failed to connect database")
+        .expect("Failed to connect database");
+
+    tracing::info!("Connected to database");
+    connection
 }
 
+/// Function to save the [`claw`]
 pub async fn save_claw(
     id: String,
     data: String,
@@ -41,6 +48,7 @@ pub async fn save_claw(
     }
 }
 
+/// Function to save the [`claw_key`]
 pub async fn save_claw_key(
     id: String,
     pem: String,
@@ -56,6 +64,7 @@ pub async fn save_claw_key(
     }
 }
 
+/// Function to get [`claw`] by `id`
 pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw::Model, AppError> {
     match claw::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
@@ -66,6 +75,7 @@ pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw:
     }
 }
 
+/// Function to get all [`claw`]
 pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, AppError> {
     match claw::Entity::find().all(db).await {
         Ok(claws) => Ok(claws),
@@ -73,6 +83,7 @@ pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, 
     }
 }
 
+/// Function to get [`claw_key`] by `id`
 pub async fn get_claw_key_by_id(
     id: String,
     db: &DatabaseConnection,
@@ -86,6 +97,9 @@ pub async fn get_claw_key_by_id(
     }
 }
 
+/// Function to delete the [`claw`]
+///
+/// This automatically deletes the [`claw_key`] (foreign key constraint)
 pub async fn delete_claw(id: String, db: &DatabaseConnection) -> Result<bool, AppError> {
     match claw::Entity::delete_by_id(id).exec(db).await {
         Ok(model) => Ok(model.rows_affected == 1),

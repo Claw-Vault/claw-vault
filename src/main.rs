@@ -32,11 +32,17 @@ async fn main() {
     // initialize app
     let app = app::App::init().await;
 
+    // initialize notifier - used for signaling jobs
     let notify = Arc::new(tokio::sync::Notify::new());
+
+    // schedule cleaner
     core::cleaner::schedule_cleaner(app.clone(), notify.clone()).await;
+
+    // serve app
     serve(app, notify).await;
 }
 
+/// Serves axum backend server
 async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     // Prepare swagger
     let swagger =
@@ -46,7 +52,7 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     // bind routes
     let router = routes::bind_routes(Router::new())
         .merge(swagger)
-        .layer(Extension(app.clone()))
+        .layer(Extension(app))
         .layer(
             TraceLayer::new_for_http()
                 .on_request(|req: &Request<_>, _: &Span| {
@@ -71,11 +77,16 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
 
     axum::serve(listener, router)
-        .with_graceful_shutdown(async move { shutdown_signal(notify).await })
+        .with_graceful_shutdown(shutdown_signal(notify))
         .await
         .unwrap();
 }
 
+/// Returns socket address for binding
+///
+/// Concatenate `PORT` from env to `0.0.0.0`
+///
+/// Defaults to `3000` if env not set
 async fn get_addr() -> String {
     let port = std::env::var("PORT").unwrap_or_else(|_| {
         tracing::info!("PORT was not provided, default to 3000");
@@ -84,10 +95,12 @@ async fn get_addr() -> String {
     format!("0.0.0.0:{}", port)
 }
 
+/// Handler for routes that are not defined
 async fn fallback_handler() -> impl IntoResponse {
     (StatusCode::UNAUTHORIZED, "Nothing to see here")
 }
 
+/// Function that listens to signals and notify waiters
 pub async fn shutdown_signal(notify: Arc<tokio::sync::Notify>) {
     let ctrl_c = async {
         tokio::signal::ctrl_c()

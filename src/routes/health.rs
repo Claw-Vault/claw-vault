@@ -1,5 +1,8 @@
 use axum::routing::{get, Router};
 
+/// Binds route for [`health`]
+///
+/// Returns a [`Router`]
 pub fn bind_routes(router: Router) -> Router {
     router.route("/health", get(health))
 }

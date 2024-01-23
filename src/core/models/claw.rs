@@ -26,6 +26,9 @@ pub enum ValidDuration {
 }
 
 impl ValidDuration {
+    /// Function to get [`ValidDuration`] from [`i64`]
+    ///
+    /// Defaults to [`ValidDuration::Minute`]
     pub fn from_i64(v: i64) -> Self {
         match v {
             900 => Self::QuarterHour,
@@ -34,6 +37,7 @@ impl ValidDuration {
         }
     }
 
+    /// Get string representation for [`ValidDuration`]
     pub fn to_string(self) -> String {
         match self {
             ValidDuration::Minute => String::from("1 minute"),
