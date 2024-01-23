@@ -5,8 +5,6 @@ use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Router};
-use sea_orm::{ConnectOptions, Database, DatabaseConnection};
-use tokio::signal;
 use tower_http::trace::TraceLayer;
 use tracing::{Level, Span};
 use tracing_subscriber::layer::SubscriberExt;
@@ -20,7 +18,7 @@ mod handlers;
 mod routes;
 mod tests;
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() {
     // initialize tracing
     tracing_subscriber::registry()
@@ -32,11 +30,14 @@ async fn main() {
     dotenv::dotenv().ok();
 
     // initialize app
-    let app = initialize_app().await;
+    let app = app::App::init().await;
 
-    // initialze cleaner
-    core::cleaner::schedule_cleaner(app.clone());
+    let notify = Arc::new(tokio::sync::Notify::new());
+    core::cleaner::schedule_cleaner(app.clone(), notify.clone()).await;
+    serve(app, notify).await;
+}
 
+async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     // Prepare swagger
     let swagger =
         SwaggerUi::new("/swagger").url("/api-doc/openapi.json", routes::ApiDoc::openapi());
@@ -68,36 +69,11 @@ async fn main() {
     let addr = get_addr().await;
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
+
     axum::serve(listener, router)
-        .with_graceful_shutdown(shutdown_signal(app))
+        .with_graceful_shutdown(async move { shutdown_signal(notify).await })
         .await
         .unwrap();
-}
-
-async fn initialize_app() -> Arc<app::App> {
-    let db = connect_db().await;
-    let tera = setup_tera().await;
-    Arc::new(app::App::new(db, tera))
-}
-
-async fn setup_tera() -> tera::Tera {
-    let template_dir = std::env::var("TEMPLATE_DIR").expect("TEMPLATE_DIR not set");
-    let template_dir = format!("{}/**/*.html", template_dir);
-    tera::Tera::new(&template_dir).expect("Failed to initialize Tera")
-}
-
-async fn connect_db() -> DatabaseConnection {
-    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-
-    let mut opts = ConnectOptions::new(db_url.to_owned());
-    opts.max_connections(255)
-        .min_connections(10)
-        .connect_timeout(Duration::from_secs(15))
-        .sqlx_logging(false);
-
-    Database::connect(opts)
-        .await
-        .expect("Failed to connect database")
 }
 
 async fn get_addr() -> String {
@@ -112,18 +88,16 @@ async fn fallback_handler() -> impl IntoResponse {
     (StatusCode::UNAUTHORIZED, "Nothing to see here")
 }
 
-async fn shutdown_signal(app: Arc<app::App>) {
-    let (_, db, _) = app.expand();
-
+pub async fn shutdown_signal(notify: Arc<tokio::sync::Notify>) {
     let ctrl_c = async {
-        signal::ctrl_c()
+        tokio::signal::ctrl_c()
             .await
             .expect("failed to install Ctrl+C handler");
     };
 
     #[cfg(unix)]
     let terminate = async {
-        signal::unix::signal(signal::unix::SignalKind::terminate())
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
             .expect("failed to install signal handler")
             .recv()
             .await;
@@ -133,16 +107,7 @@ async fn shutdown_signal(app: Arc<app::App>) {
     let terminate = std::future::pending::<()>();
 
     tokio::select! {
-        _ = ctrl_c => {terminate_app(db).await},
-        _ = terminate => {terminate_app(db).await},
+        _ = ctrl_c => {notify.notify_waiters()},
+        _ = terminate => {notify.notify_waiters()},
     }
-}
-
-async fn terminate_app(db: Arc<DatabaseConnection>) {
-    db.as_ref()
-        .to_owned()
-        .close()
-        .await
-        .expect("Failed to disconnect DB");
-    println!("Terminated App")
 }

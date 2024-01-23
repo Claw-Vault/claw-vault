@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::core::{cipher, dto};
+use crate::core::{cipher, dao, dto};
 use axum::{
     extract::{rejection::JsonRejection, FromRequest},
     http::StatusCode,
@@ -16,7 +16,19 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(db_conn: DatabaseConnection, tera: tera::Tera) -> Self {
+    pub async fn init() -> Arc<App> {
+        let db = dao::connect_db().await;
+        let tera = App::setup_tera().await;
+        Arc::new(App::new(db, tera))
+    }
+
+    async fn setup_tera() -> tera::Tera {
+        let template_dir = std::env::var("TEMPLATE_DIR").expect("TEMPLATE_DIR not set");
+        let template_dir = format!("{}/**/*.html", template_dir);
+        tera::Tera::new(&template_dir).expect("Failed to initialize Tera")
+    }
+
+    fn new(db_conn: DatabaseConnection, tera: tera::Tera) -> Self {
         return App {
             cipher: Arc::new(cipher::Cipher::new()),
             db: Arc::new(db_conn),
@@ -24,8 +36,25 @@ impl App {
         };
     }
 
-    pub fn expand(&self) -> (Arc<cipher::Cipher>, Arc<DatabaseConnection>, Arc<tera::Tera>) {
+    pub fn expand(
+        &self,
+    ) -> (
+        Arc<cipher::Cipher>,
+        Arc<DatabaseConnection>,
+        Arc<tera::Tera>,
+    ) {
         return (self.cipher.clone(), self.db.clone(), self.tera.clone());
+    }
+
+    pub async fn terminate(&self) {
+        self.db
+            .as_ref()
+            .to_owned()
+            .close()
+            .await
+            .expect("Failed to disconnect DB");
+
+        tracing::info!("Terminated App");
     }
 }
 

@@ -1,9 +1,25 @@
+use std::time::Duration;
+
 use chrono::Utc;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, Set};
+use sea_orm::{ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, EntityTrait, Set};
 
 use crate::app::AppError;
 
 use super::models::{claw, claw_keys};
+
+pub async fn connect_db() -> DatabaseConnection {
+    let db_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    let mut opts = ConnectOptions::new(db_url.to_owned());
+    opts.max_connections(255)
+        .min_connections(10)
+        .connect_timeout(Duration::from_secs(15))
+        .sqlx_logging(false);
+
+    Database::connect(opts)
+        .await
+        .expect("Failed to connect database")
+}
 
 pub async fn save_claw(
     id: String,
