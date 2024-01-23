@@ -25,7 +25,7 @@ pub async fn schedule_cleaner(
                     _ = notify.notified() => break,
                 }
                 tokio::select! {
-                    _ = tokio::time::sleep(Duration::from_secs(45)) => {},
+                    _ = tokio::time::sleep(Duration::from_secs(30)) => {},
                     _ = notify.notified() => break,
                 }
             }
@@ -41,7 +41,7 @@ pub async fn schedule_cleaner(
 /// - Loops through all the claws
 /// - Delete claw if current time seconds are more the requested validity [`super::models::claw::ValidDuration`]
 ///
-/// This function runs periodically every 45 seconds
+/// This function runs periodically every 30 seconds
 async fn cleaner(app: Arc<App>) {
     // get db connection
     let (_, db, _) = app.expand();
