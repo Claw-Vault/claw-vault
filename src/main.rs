@@ -1,9 +1,9 @@
 use std::sync::Arc;
 use std::time::Duration;
 
+use app::{App, HtmlTemplate};
 use axum::extract::Request;
-use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
+use axum::response::Response;
 use axum::{Extension, Router};
 use tower_http::trace::TraceLayer;
 use tracing::{Level, Span};
@@ -52,6 +52,7 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     // bind routes
     let router = routes::bind_routes(Router::new())
         .merge(swagger)
+        .fallback(fallback_handler)
         .layer(Extension(app))
         .layer(
             TraceLayer::new_for_http()
@@ -68,8 +69,7 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
                 // By default `TraceLayer` will log 5xx responses but we're doing our specific
                 // logging of errors so disable that
                 .on_failure(()),
-        )
-        .fallback(fallback_handler);
+        );
 
     // run our app with hyper, listening globally on port 3000
     let addr = get_addr().await;
@@ -96,8 +96,9 @@ async fn get_addr() -> String {
 }
 
 /// Handler for routes that are not defined
-async fn fallback_handler() -> impl IntoResponse {
-    (StatusCode::UNAUTHORIZED, "Nothing to see here")
+async fn fallback_handler(Extension(app): Extension<Arc<App>>) -> HtmlTemplate {
+    let (_, _, tera) = app.expand();
+    HtmlTemplate(tera, "404.html", None)
 }
 
 /// Function that listens to signals and notify waiters

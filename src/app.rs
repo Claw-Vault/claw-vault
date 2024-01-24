@@ -105,12 +105,21 @@ where
 /// - [`tera::Tera`]    : Template renderer
 /// - [`str`]           : Html file name
 /// - [`tera::Context`] : Context to bind variables to template
-pub struct HtmlTemplate(pub Arc<tera::Tera>, pub &'static str, pub tera::Context);
+pub struct HtmlTemplate(
+    pub Arc<tera::Tera>,
+    pub &'static str,
+    pub Option<tera::Context>,
+);
 
 impl IntoResponse for HtmlTemplate {
     /// Function to render the provided template
     fn into_response(self) -> Response {
-        match self.0.render(self.1, &self.2) {
+        let ctx = if let Some(ctx) = self.2 {
+            ctx
+        } else {
+            tera::Context::new()
+        };
+        match self.0.render(self.1, &ctx) {
             Ok(html) => Html(html).into_response(),
             Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
         }

@@ -1,4 +1,5 @@
 use axum::routing::{get, Router};
+use tower_http::services::ServeDir;
 
 use crate::handlers::web;
 
@@ -8,6 +9,7 @@ use crate::handlers::web;
 pub fn bind_routes(router: Router) -> Router {
     router
         .route("/", get(web::index))
-        .route("/store", get(web::store))
+        .nest_service("/assets", ServeDir::new("assets"))
+        .route("/privacy", get(web::privacy))
         .route("/:id", get(web::vault))
 }
