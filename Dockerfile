@@ -19,6 +19,7 @@ FROM alpine:3.19
 # Copy the binary from the build stage
 COPY --from=builder /usr/local/cargo/bin/claw-vault /usr/local/bin/claw-vault
 COPY --from=builder /usr/src/app/templates /usr/local/bin/templates
+COPY --from=builder /usr/src/app/assets /usr/local/bin/assets
 
 EXPOSE 3000
 

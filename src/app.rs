@@ -30,6 +30,7 @@ impl App {
     pub async fn init() -> Arc<App> {
         let db = dao::connect_db().await;
         let tera = App::setup_tera().await;
+        let _ = std::env::var("ASSETS_DIR").expect("ASSETS_DIR not set");
         Arc::new(App::new(db, tera))
     }
 

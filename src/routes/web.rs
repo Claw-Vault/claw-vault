@@ -9,7 +9,10 @@ use crate::handlers::web;
 pub fn bind_routes(router: Router) -> Router {
     router
         .route("/", get(web::index))
-        .nest_service("/assets", ServeDir::new("assets"))
+        .nest_service(
+            "/assets",
+            ServeDir::new(std::env::var("ASSETS_DIR").unwrap()),
+        )
         .route("/privacy", get(web::privacy))
         .route("/:id", get(web::vault))
 }
