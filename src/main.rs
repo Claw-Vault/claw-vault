@@ -132,7 +132,7 @@ where
     T: axum::http::header::AsHeaderName,
 {
     if let Some(v) = headers.get(header) {
-        v.to_str().unwrap_or_else(|_| "<nil>")
+        v.to_str().unwrap_or("<nil>")
     } else {
         "<nil>"
     }

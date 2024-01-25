@@ -30,6 +30,5 @@ pub struct ApiDoc;
 pub fn bind_routes(router: Router) -> Router {
     let router = health::bind_routes(router);
     let router = api::bind_routes(router);
-    let router = web::bind_routes(router);
-    router
+    web::bind_routes(router)
 }

@@ -37,13 +37,13 @@ pub async fn encrypt(
     // return encrypted data and public pem
     let (encrypted, pem) = match cipher.encrypt(data) {
         Ok((enc, pem)) => (enc, pem),
-        Err(err) => return Err(AppError::ServerError(err.to_string())),
+        Err(err) => return Err(AppError::ServerError(err.string())),
     };
 
     // encrypt public pem
     let pem = match cipher.encrypt_pem(&uuid, pem) {
         Ok(pem) => pem,
-        Err(err) => return Err(AppError::ServerError(err.to_string())),
+        Err(err) => return Err(AppError::ServerError(err.string())),
     };
 
     // save claw
@@ -60,7 +60,7 @@ pub async fn encrypt(
     Ok(Json(dto::EncryptResponse::new(
         claw.id,
         uuid,
-        claw.validity.to_string(),
+        claw.validity.string(),
     )))
 }
 
@@ -104,13 +104,13 @@ pub async fn decrypt(
     // decrypt public pem from claw_key
     let pem = match cipher.decrypt_pem(&uuid, claw_key.pem) {
         Ok(pem) => pem,
-        Err(err) => return Err(AppError::BadRequest(err.to_string())),
+        Err(err) => return Err(AppError::BadRequest(err.string())),
     };
 
     // decrypt data using public pem
     let data = match cipher.decrypt(pem, claw.data) {
         Ok(data) => data,
-        Err(err) => return Err(AppError::BadRequest(err.to_string())),
+        Err(err) => return Err(AppError::BadRequest(err.string())),
     };
 
     // delete claw and claw_key

@@ -1,7 +1,7 @@
 use axum::{extract::Request, http::HeaderValue, middleware::Next, response::Response};
 use rand::RngCore;
 
-pub const X_REQUEST_ID: &'static str = "X-Req-id";
+pub const X_REQUEST_ID: &str = "X-Req-Id";
 
 pub async fn request_id(req: Request, next: Next) -> Response {
     let id = generate_id();
@@ -22,5 +22,5 @@ fn generate_id() -> String {
     let mut b = [0u8; 3];
     rng.fill_bytes(&mut b);
 
-    b.iter().map(|i| format!("{:x}", i)).collect()
+    b.iter().fold(String::new(), |_, i| format!("{:x}", i))
 }

@@ -27,7 +27,7 @@ impl CipherError {
         }
     }
 
-    pub fn to_string(&self) -> String {
+    pub fn string(&self) -> String {
         String::from(self.as_str())
     }
 }
@@ -46,19 +46,19 @@ impl Cipher {
     const RSA_BITS: u32 = 4096;
 
     pub fn new() -> Self {
-        return Cipher {
+        Cipher {
             base64_engine: base64::engine::GeneralPurpose::new(
                 &base64::alphabet::URL_SAFE,
                 base64::engine::general_purpose::NO_PAD,
             ),
-        };
+        }
     }
 
     /// Encodes array to base64 [`String`]
     fn encode_string(&self, buf: &[u8]) -> String {
         let mut encoded_string = String::new();
         self.base64_engine.encode_string(buf, &mut encoded_string);
-        return encoded_string;
+        encoded_string
     }
 
     /// Decode base64 array to [`Vec<u8>`]

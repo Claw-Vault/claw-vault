@@ -1,5 +1,3 @@
-use rand::RngCore;
-
 #[test]
 fn arc_clone_test() {
     let arr = String::from("Hello");
@@ -44,16 +42,24 @@ fn fermat_primes() {
 
 #[test]
 fn rand_req_id() {
-    let a = generate_id();
-    let b = generate_id();
+    let a: String = {
+        use rand::RngCore;
+
+        let mut rng = rand::thread_rng();
+        let mut b = [0u8; 3];
+        rng.fill_bytes(&mut b);
+
+        b.iter().fold(String::new(), |_, i| format!("{:x}", i))
+    };
+    let b: String = {
+        use rand::RngCore;
+
+        let mut rng = rand::thread_rng();
+        let mut b = [0u8; 3];
+        rng.fill_bytes(&mut b);
+
+        b.iter().fold(String::new(), |_, i| format!("{:x}", i))
+    };
     println!("{} - {}", a, b);
     assert_ne!(a, b);
-}
-
-fn generate_id() -> String {
-    let mut rng = rand::thread_rng();
-    let mut b = [0u8; 3];
-    rng.fill_bytes(&mut b);
-
-    b.iter().map(|i| format!("{:x}", i)).collect()
 }

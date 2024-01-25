@@ -38,7 +38,7 @@ impl ValidDuration {
     }
 
     /// Get string representation for [`ValidDuration`]
-    pub fn to_string(self) -> String {
+    pub fn string(self) -> String {
         match self {
             ValidDuration::Minute => String::from("1 minute"),
             ValidDuration::QuarterHour => String::from("15 minutes"),

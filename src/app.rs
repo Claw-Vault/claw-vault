@@ -54,11 +54,11 @@ impl App {
     ///
     /// Takes in [`DatabaseConnection`] and [`tera::Tera`]
     fn new(db_conn: DatabaseConnection, tera: tera::Tera) -> Self {
-        return App {
+        App {
             cipher: Arc::new(cipher::Cipher::new()),
             db: Arc::new(db_conn),
             tera: Arc::new(tera),
-        };
+        }
     }
 
     /// This functions returns instances of the objects
@@ -70,7 +70,7 @@ impl App {
         Arc<DatabaseConnection>,
         Arc<tera::Tera>,
     ) {
-        return (self.cipher.clone(), self.db.clone(), self.tera.clone());
+        (self.cipher.clone(), self.db.clone(), self.tera.clone())
     }
 
     /// Terminates the object that are required for graceful shutdown
