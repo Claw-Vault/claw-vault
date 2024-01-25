@@ -23,7 +23,13 @@ async fn main() {
     // initialize tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env().add_directive(Level::INFO.into()))
-        .with(tracing_subscriber::fmt::layer())
+        .with(
+            tracing_subscriber::fmt::layer()
+                .json()
+                .with_line_number(true)
+                .with_thread_ids(true)
+                .with_thread_names(true),
+        )
         .init();
 
     // load env
@@ -57,13 +63,20 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
         .layer(
             TraceLayer::new_for_http()
                 .on_request(|req: &Request<_>, _: &Span| {
-                    tracing::info!("{} {}", req.method(), req.uri())
+                    let agent =
+                        if let Some(agent) = req.headers().get(axum::http::header::USER_AGENT) {
+                            agent.to_str().unwrap_or_else(|_| "<err>")
+                        } else {
+                            "<nil>"
+                        };
+
+                    tracing::info!(user_agent = agent, "{} {}", req.method(), req.uri());
                 })
                 .on_response(|response: &Response, latency: Duration, _: &Span| {
                     tracing::info!(
                         "Completed with status {} in {} ms",
                         response.status(),
-                        latency.as_millis()
+                        latency.as_millis(),
                     )
                 })
                 // By default `TraceLayer` will log 5xx responses but we're doing our specific
