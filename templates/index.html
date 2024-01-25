@@ -325,12 +325,13 @@
         }
 
         function timer() {
-            let timer = 5;
+            let timer = 9;
             let interval = setInterval(() => {
                 if (document.getElementById('modal').classList.contains('hidden')) {
+                    clearInterval(interval);
                     return;
                 }
-                document.getElementById('closing').innerHTML = "Will be automatically copied to clipboard in " + timer + " seconds";
+                document.getElementById('closing').innerHTML = "Dialog will close in " + timer + " seconds";
                 timer--;
                 if (timer < 0) {
                     clearInterval(interval);
@@ -340,8 +341,8 @@
                 if (document.getElementById('modal').classList.contains('hidden')) {
                     return;
                 }
-                closeDialog();
-            }, 6000);
+                toggleDialog(false);
+            }, 10000);
         }
 
         function closeDialog(failed = false) {
