@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::Path, Extension};
+use axum::{extract::Path, http::StatusCode, Extension};
 
 use crate::{
     app::{App, AppError, HtmlTemplate},
@@ -9,12 +9,12 @@ use crate::{
 
 pub async fn index(Extension(app): Extension<Arc<App>>) -> Result<HtmlTemplate, AppError> {
     let (_, _, tera) = app.expand();
-    Ok(HtmlTemplate(tera, "index.html", None))
+    Ok(HtmlTemplate(tera, "index.html", None, None))
 }
 
 pub async fn privacy(Extension(app): Extension<Arc<App>>) -> Result<HtmlTemplate, AppError> {
     let (_, _, tera) = app.expand();
-    Ok(HtmlTemplate(tera, "privacy.html", None))
+    Ok(HtmlTemplate(tera, "privacy.html", None, None))
 }
 
 pub async fn vault(
@@ -25,11 +25,18 @@ pub async fn vault(
 
     let claw = match dao::get_claw_by_id(id, &db).await {
         Ok(claw) => claw,
-        Err(_) => return Err(HtmlTemplate(tera, "404.html", None)),
+        Err(_) => {
+            return Err(HtmlTemplate(
+                tera,
+                "404.html",
+                Some(StatusCode::NOT_FOUND),
+                None,
+            ))
+        }
     };
 
     let mut ctx = tera::Context::new();
     ctx.insert("id", &claw.id);
 
-    Ok(HtmlTemplate(tera, "vault.html", Some(ctx)))
+    Ok(HtmlTemplate(tera, "vault.html", None, Some(ctx)))
 }

@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use app::{App, HtmlTemplate};
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::Response;
@@ -16,6 +15,7 @@ use utoipa_swagger_ui::SwaggerUi;
 mod app;
 mod core;
 mod handlers;
+mod middleware;
 mod routes;
 mod tests;
 
@@ -24,12 +24,7 @@ async fn main() {
     // initialize tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env().add_directive(Level::INFO.into()))
-        .with(
-            tracing_subscriber::fmt::layer()
-                .json()
-                .with_line_number(true)
-                .with_thread_ids(true),
-        )
+        .with(tracing_subscriber::fmt::layer().with_thread_ids(true))
         .init();
 
     // load env
@@ -58,49 +53,30 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
     // bind routes
     let router = routes::bind_routes(Router::new())
         .merge(swagger)
-        .fallback(fallback_handler)
+        .fallback(handlers::fallback_handler)
         .layer(Extension(app))
         .layer(
-            TraceLayer::new_for_http()
-                .on_request(|req: &Request<_>, _: &Span| {
-                    let agent =
-                        if let Some(agent) = req.headers().get(axum::http::header::USER_AGENT) {
-                            agent.to_str().unwrap_or_else(|_| "<err>")
-                        } else {
-                            "<nil>"
-                        };
-
-                    tracing::info!(user_agent = agent, "{} {}", req.method(), req.uri());
-                })
-                .on_response(|response: &Response, latency: Duration, _: &Span| {
-                    match response.status() {
-                        StatusCode::OK => {
-                            tracing::info!(
-                                "Completed with status {} in {} ms",
-                                response.status(),
-                                latency.as_millis(),
-                            )
-                        }
-                        StatusCode::INTERNAL_SERVER_ERROR => {
-                            tracing::error!(
-                                "Completed with status {} in {} ms",
-                                response.status(),
-                                latency.as_millis(),
-                            )
-                        }
-                        _ => {
-                            tracing::warn!(
-                                "Completed with status {} in {} ms",
-                                response.status(),
-                                latency.as_millis(),
-                            )
-                        }
-                    }
-                })
-                // By default `TraceLayer` will log 5xx responses but we're doing our specific
-                // logging of errors so disable that
-                .on_failure(()),
-        );
+            TraceLayer::new_for_http().on_request(|req: &Request<_>, _: &Span| {
+                let req_id = get_header(middleware::X_REQUEST_ID, req.headers());
+                tracing::info!(req_id = req_id, method = ?req.method(), uri=?req.uri());
+            }),
+        )
+        .layer(axum::middleware::from_fn(middleware::request_id))
+        .layer(TraceLayer::new_for_http().on_response(
+            |res: &Response, latency: Duration, _: &Span| {
+                let req_id = get_header(middleware::X_REQUEST_ID, res.headers());
+                let message = format!(
+                    "Completed with status {} in {} ms",
+                    res.status(),
+                    latency.as_millis()
+                );
+                match res.status() {
+                    StatusCode::OK => tracing::info!(req_id = req_id, message),
+                    StatusCode::INTERNAL_SERVER_ERROR => tracing::error!(req_id = req_id, message),
+                    _ => tracing::warn!(req_id = req_id, message),
+                }
+            },
+        ));
 
     // run our app with hyper, listening globally on port 3000
     let addr = get_addr().await;
@@ -126,12 +102,6 @@ async fn get_addr() -> String {
     format!("0.0.0.0:{}", port)
 }
 
-/// Handler for routes that are not defined
-async fn fallback_handler(Extension(app): Extension<Arc<App>>) -> HtmlTemplate {
-    let (_, _, tera) = app.expand();
-    HtmlTemplate(tera, "404.html", None)
-}
-
 /// Function that listens to signals and notify waiters
 pub async fn shutdown_signal(notify: Arc<tokio::sync::Notify>) {
     let ctrl_c = async {
@@ -154,5 +124,16 @@ pub async fn shutdown_signal(notify: Arc<tokio::sync::Notify>) {
     tokio::select! {
         _ = ctrl_c => {notify.notify_waiters()},
         _ = terminate => {notify.notify_waiters()},
+    }
+}
+
+fn get_header<T>(header: T, headers: &axum::http::HeaderMap) -> &str
+where
+    T: axum::http::header::AsHeaderName,
+{
+    if let Some(v) = headers.get(header) {
+        v.to_str().unwrap_or_else(|_| "<nil>")
+    } else {
+        "<nil>"
     }
 }

@@ -21,7 +21,7 @@ axum = { version = "0.7.4", features = ["macros"] }
 serde = { version = "1.0.195", features = ["derive"] }
 tower-http = { version = "0.5.1", features = ["fs", "trace"] }
 tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 # swagger
 utoipa = { version = "4.2.0", features = ["axum_extras"] }

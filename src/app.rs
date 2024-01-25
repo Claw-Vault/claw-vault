@@ -114,19 +114,27 @@ where
 pub struct HtmlTemplate(
     pub Arc<tera::Tera>,
     pub &'static str,
+    pub Option<StatusCode>,
     pub Option<tera::Context>,
 );
 
 impl IntoResponse for HtmlTemplate {
     /// Function to render the provided template
     fn into_response(self) -> Response {
-        let ctx = if let Some(ctx) = self.2 {
+        let ctx = if let Some(ctx) = self.3 {
             ctx
         } else {
             tera::Context::new()
         };
+
+        let status_code = if let Some(status) = self.2 {
+            status
+        } else {
+            StatusCode::OK
+        };
+
         match self.0.render(self.1, &ctx) {
-            Ok(html) => Html(html).into_response(),
+            Ok(html) => (status_code, Html(html)).into_response(),
             Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
         }
     }
