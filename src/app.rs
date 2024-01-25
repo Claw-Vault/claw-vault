@@ -42,7 +42,12 @@ impl App {
     async fn setup_tera() -> tera::Tera {
         let template_dir = std::env::var("TEMPLATE_DIR").expect("TEMPLATE_DIR not set");
         let template_dir = format!("{}/**/*.html", template_dir);
-        tera::Tera::new(&template_dir).expect("Failed to initialize Tera")
+        let mut tera = tera::Tera::new(&template_dir).expect("Failed to initialize Tera");
+        crate::core::tera::add_404(&mut tera);
+        crate::core::tera::add_index(&mut tera);
+        crate::core::tera::add_privacy(&mut tera);
+        crate::core::tera::add_vault(&mut tera);
+        tera
     }
 
     /// Private constructor for [`App`]
