@@ -37,13 +37,13 @@ pub async fn encrypt(
     // return encrypted data and public pem
     let (encrypted, pem) = match cipher.encrypt(data) {
         Ok((enc, pem)) => (enc, pem),
-        Err(err) => return Err(AppError::ServerError(err.string())),
+        Err(err) => return Err(AppError::ServerError(err.as_str())),
     };
 
     // encrypt public pem
     let pem = match cipher.encrypt_pem(&uuid, pem) {
         Ok(pem) => pem,
-        Err(err) => return Err(AppError::ServerError(err.string())),
+        Err(err) => return Err(AppError::ServerError(err.as_str())),
     };
 
     // save claw
@@ -60,7 +60,7 @@ pub async fn encrypt(
     Ok(Json(dto::EncryptResponse::new(
         claw.id,
         uuid,
-        claw.validity.string(),
+        claw.validity.as_str(),
     )))
 }
 
@@ -86,17 +86,22 @@ pub async fn decrypt(
     // validate uuid
     let uuid = match Uuid::from_str(key.as_str()) {
         Ok(uuid) => uuid,
-        Err(_) => return Err(AppError::BadRequest(String::from("Bad key"))),
+        Err(_) => return Err(AppError::BadRequest("Bad key")),
     };
 
+    let (claw, claw_key) = tokio::join!(
+        dao::get_claw_by_id(id.clone(), &db),
+        dao::get_claw_key_by_id(id.clone(), &db),
+    );
+
     // get claw from id
-    let claw = match dao::get_claw_by_id(id.clone(), &db).await {
+    let claw = match claw {
         Ok(model) => model,
         Err(err) => return Err(err),
     };
 
     // get claw_key from same id
-    let claw_key = match dao::get_claw_key_by_id(id, &db).await {
+    let claw_key = match claw_key {
         Ok(model) => model,
         Err(err) => return Err(err),
     };
@@ -104,13 +109,13 @@ pub async fn decrypt(
     // decrypt public pem from claw_key
     let pem = match cipher.decrypt_pem(&uuid, claw_key.pem) {
         Ok(pem) => pem,
-        Err(err) => return Err(AppError::BadRequest(err.string())),
+        Err(err) => return Err(AppError::BadRequest(err.as_str())),
     };
 
     // decrypt data using public pem
     let data = match cipher.decrypt(pem, claw.data) {
         Ok(data) => data,
-        Err(err) => return Err(AppError::BadRequest(err.string())),
+        Err(err) => return Err(AppError::BadRequest(err.as_str())),
     };
 
     // delete claw and claw_key

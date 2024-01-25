@@ -142,22 +142,20 @@ impl IntoResponse for HtmlTemplate {
 
 /// Enum for customize and handling errors
 pub enum AppError {
-    BadRequest(String),
+    BadRequest(&'static str),
     InvalidBody(JsonRejection),
-    ServerError(String),
-    DbError(String),
+    ServerError(&'static str),
+    DbError(&'static str),
 }
 
 impl IntoResponse for AppError {
     /// Function to map errors into appropriate responses
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            AppError::InvalidBody(_) => (StatusCode::BAD_REQUEST, String::from("Invalid payload")),
+            AppError::InvalidBody(_) => (StatusCode::BAD_REQUEST, "Invalid payload"),
             AppError::BadRequest(err) => (StatusCode::BAD_REQUEST, err),
             AppError::ServerError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err),
-            AppError::DbError(err) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, format!("DbErr: {}", err))
-            }
+            AppError::DbError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err),
         };
 
         (status, Json(dto::ErrorMessage::new(status, message))).into_response()

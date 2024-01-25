@@ -44,7 +44,10 @@ pub async fn save_claw(
     };
     match model.insert(db).await {
         Ok(v) => Ok(v),
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to save claw"))
+        }
     }
 }
 
@@ -60,18 +63,27 @@ pub async fn save_claw_key(
     };
     match model.insert(db).await {
         Ok(v) => Ok(v),
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to save claw_key"))
+        }
     }
 }
 
 /// Function to get [`claw`] by `id`
-pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw::Model, AppError> {
+pub async fn get_claw_by_id(
+    id: String,
+    db: &DatabaseConnection,
+) -> Result<claw::Model, AppError> {
     match claw::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
             Some(model) => Ok(model),
-            None => Err(AppError::BadRequest(String::from("No data for id"))),
+            None => Err(AppError::BadRequest("No data for id")),
         },
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to get claw by id"))
+        }
     }
 }
 
@@ -79,7 +91,10 @@ pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw:
 pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, AppError> {
     match claw::Entity::find().all(db).await {
         Ok(claws) => Ok(claws),
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to get all claws"))
+        }
     }
 }
 
@@ -91,9 +106,12 @@ pub async fn get_claw_key_by_id(
     match claw_keys::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
             Some(model) => Ok(model),
-            None => Err(AppError::BadRequest(String::from("No key for id"))),
+            None => Err(AppError::BadRequest("No key for id")),
         },
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to get claw_key by id"))
+        }
     }
 }
 
@@ -103,6 +121,9 @@ pub async fn get_claw_key_by_id(
 pub async fn delete_claw(id: String, db: &DatabaseConnection) -> Result<bool, AppError> {
     match claw::Entity::delete_by_id(id).exec(db).await {
         Ok(model) => Ok(model.rows_affected == 1),
-        Err(err) => Err(AppError::DbError(err.to_string())),
+        Err(err) => {
+            tracing::error!("DBErr: {}", err);
+            Err(AppError::DbError("DBErr: Failed to delete claw"))
+        }
     }
 }

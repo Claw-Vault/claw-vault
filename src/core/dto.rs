@@ -48,11 +48,11 @@ pub struct EncryptResponse {
 }
 
 impl EncryptResponse {
-    pub fn new(data_id: String, key_id: Uuid, valid_for: String) -> Self {
+    pub fn new(data_id: String, key_id: Uuid, valid_for: &'static str) -> Self {
         EncryptResponse {
             data_id,
             key_id: key_id.to_string(),
-            valid_for,
+            valid_for: String::from(valid_for),
         }
     }
 }
@@ -73,11 +73,11 @@ impl DecryptResponse {
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct ErrorMessage {
     code: u16,
-    message: String,
+    message: &'static str,
 }
 
 impl ErrorMessage {
-    pub fn new(code: StatusCode, message: String) -> Self {
+    pub fn new(code: StatusCode, message: &'static str) -> Self {
         ErrorMessage {
             code: code.as_u16(),
             message,
