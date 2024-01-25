@@ -22,5 +22,8 @@ fn generate_id() -> String {
     let mut b = [0u8; 3];
     rng.fill_bytes(&mut b);
 
-    b.iter().fold(String::new(), |_, i| format!("{:x}", i))
+    b.iter().fold(String::new(), |mut str, i| {
+        str += format!("{:x}", i).as_str();
+        str
+    })
 }
