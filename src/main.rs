@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use app::{App, HtmlTemplate};
 use axum::extract::Request;
+use axum::http::StatusCode;
 use axum::response::Response;
 use axum::{Extension, Router};
 use tower_http::trace::TraceLayer;
@@ -27,8 +28,7 @@ async fn main() {
             tracing_subscriber::fmt::layer()
                 .json()
                 .with_line_number(true)
-                .with_thread_ids(true)
-                .with_thread_names(true),
+                .with_thread_ids(true),
         )
         .init();
 
@@ -73,11 +73,29 @@ async fn serve(app: Arc<app::App>, notify: Arc<tokio::sync::Notify>) {
                     tracing::info!(user_agent = agent, "{} {}", req.method(), req.uri());
                 })
                 .on_response(|response: &Response, latency: Duration, _: &Span| {
-                    tracing::info!(
-                        "Completed with status {} in {} ms",
-                        response.status(),
-                        latency.as_millis(),
-                    )
+                    match response.status() {
+                        StatusCode::OK => {
+                            tracing::info!(
+                                "Completed with status {} in {} ms",
+                                response.status(),
+                                latency.as_millis(),
+                            )
+                        }
+                        StatusCode::INTERNAL_SERVER_ERROR => {
+                            tracing::error!(
+                                "Completed with status {} in {} ms",
+                                response.status(),
+                                latency.as_millis(),
+                            )
+                        }
+                        _ => {
+                            tracing::warn!(
+                                "Completed with status {} in {} ms",
+                                response.status(),
+                                latency.as_millis(),
+                            )
+                        }
+                    }
                 })
                 // By default `TraceLayer` will log 5xx responses but we're doing our specific
                 // logging of errors so disable that
