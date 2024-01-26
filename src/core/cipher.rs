@@ -69,6 +69,11 @@ impl Cipher {
         }
     }
 
+    /// Generates [`sha::sha256`] hash for the data
+    pub fn sha256(&self, data: &[u8]) -> String {
+        hex::encode(sha::sha256(data))
+    }
+
     /// Encrypts pem using [`XORCryptor`]
     pub fn encrypt_pem(&self, key: &Uuid, pem: String) -> Result<String, CipherError> {
         let xrc = match XORCryptor::new(&key.to_string()) {
@@ -155,7 +160,7 @@ impl Cipher {
         let time = format!("{}", time);
         (
             self.encode_string(time.as_bytes()),
-            hex::encode(sha::sha256(data.as_bytes())),
+            self.sha256(data.as_bytes()),
         )
     }
 }

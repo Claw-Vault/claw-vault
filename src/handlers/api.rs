@@ -118,6 +118,11 @@ pub async fn decrypt(
         Err(err) => return Err(AppError::BadRequest(err.as_str())),
     };
 
+    let hash = cipher.sha256(data.as_bytes());
+    if hash != claw.sha256 {
+        return Err(AppError::BadRequest("SHA256 checksum do not match"));
+    }
+
     // delete claw and claw_key
     match dao::delete_claw(claw.id, &db).await {
         Ok(_) => (),
