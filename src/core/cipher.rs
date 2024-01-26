@@ -1,5 +1,8 @@
 use base64::Engine;
-use openssl::rsa::{Padding, Rsa};
+use openssl::{
+    rsa::{Padding, Rsa},
+    sha,
+};
 use uuid::Uuid;
 use xor_cryptor::XORCryptor;
 
@@ -145,17 +148,14 @@ impl Cipher {
 
     /// Generates `id` and `hash` from data
     ///
-    /// `hash` is the [`md5`] hash of the data
-    /// `id` is the [`md5`] hash of the data + current time in millis
+    /// `hash` is the [`sha::sha256`] hash of the data
+    /// `id` is the [`base64`] encoded current time in millis
     pub fn generate_id_hash(&self, data: &String) -> (String, String) {
-        let mut ctx = md5::Context::new();
         let time = std::time::UNIX_EPOCH.elapsed().unwrap().as_millis();
         let time = format!("{}", time);
-        ctx.consume(time.as_bytes());
-        ctx.consume(data.as_bytes());
-
-        let id = format!("{:x}", ctx.compute());
-        let hash = format!("{:x}", md5::compute(data.as_bytes()));
-        (id, hash)
+        (
+            self.encode_string(time.as_bytes()),
+            hex::encode(sha::sha256(data.as_bytes())),
+        )
     }
 }

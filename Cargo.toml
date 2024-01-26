@@ -32,7 +32,7 @@ uuid = { version = "1.7.0", features = ["v4"] }
 openssl = { version = "0.10", features = ["vendored"] }
 rand = "0.8.5"
 base64 = "0.21.7"
-md5 = "0.7.0"
+hex = "0.4.3"
 xor_cryptor = "1.1.0"
 
 #db
@@ -46,3 +46,7 @@ chrono = "0.4.31"
 [profile.release]
 strip = true
 lto = true
+
+[dev-dependencies]
+tower = "0.4.13"
+http-body-util = "0.1.0"

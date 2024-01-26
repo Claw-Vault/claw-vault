@@ -9,7 +9,7 @@ pub struct Model {
     pub id: String,
     #[sea_orm(column_type = "Text")]
     pub data: String,
-    pub md5hash: String,
+    pub sha256: String,
     pub validity: ValidDuration,
     pub created_at: DateTime,
 }

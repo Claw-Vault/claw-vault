@@ -32,7 +32,7 @@ pub async fn encrypt(
 
     // generate uuid, id and md5hash
     let uuid = Uuid::new_v4();
-    let (id, md5hash) = cipher.generate_id_hash(&data);
+    let (id, hash) = cipher.generate_id_hash(&data);
 
     // return encrypted data and public pem
     let (encrypted, pem) = match cipher.encrypt(data) {
@@ -47,7 +47,7 @@ pub async fn encrypt(
     };
 
     // save claw
-    let claw = match dao::save_claw(id.clone(), encrypted, md5hash, validity, &db).await {
+    let claw = match dao::save_claw(id.clone(), encrypted, hash, validity, &db).await {
         Ok(v) => v,
         Err(err) => return Err(err),
     };

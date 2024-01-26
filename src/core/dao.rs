@@ -31,14 +31,14 @@ pub async fn connect_db() -> DatabaseConnection {
 pub async fn save_claw(
     id: String,
     data: String,
-    md5hash: String,
+    hash: String,
     validity: i64,
     db: &DatabaseConnection,
 ) -> Result<claw::Model, AppError> {
     let model = claw::ActiveModel {
         id: Set(id),
         data: Set(data),
-        md5hash: Set(md5hash),
+        sha256: Set(hash),
         validity: Set(claw::ValidDuration::from_i64(validity)),
         created_at: Set(Utc::now().naive_utc()),
     };
@@ -71,10 +71,7 @@ pub async fn save_claw_key(
 }
 
 /// Function to get [`claw`] by `id`
-pub async fn get_claw_by_id(
-    id: String,
-    db: &DatabaseConnection,
-) -> Result<claw::Model, AppError> {
+pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw::Model, AppError> {
     match claw::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
             Some(model) => Ok(model),
