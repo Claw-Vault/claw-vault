@@ -6,12 +6,14 @@ COPY . .
 # Install build dependencies
 RUN apk add --no-cache musl-dev perl-utils make
 
+ARG DATABASE_URL
+ENV TEMPLATE_DIR=templates
+ENV ASSETS_DIR=assets
+ARG PORT
+
 # Build the application
 RUN cargo test --release
 RUN cargo install --path .
-
-ARG DATABASE_URL
-ARG PORT
 
 # Start a new, final image
 FROM alpine:3.19
