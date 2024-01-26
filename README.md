@@ -12,6 +12,13 @@ He is a symbol of commitment to privacy and security.
 ## About
 Meet [Claw Vault](https://claw-vault.up.railway.app), a platform to share sensitive information with desired recipients. Claw Vault encrypts your data, providing a unique ID and key for secure transmission. Your recipient can easily access the encrypted content using the ID and key, ensuring confidentiality. Data is automatically deleted upon access or expiration, prioritizing your privacy.
 
+## Cryptographic Libraries
+
+Here are the cryptographic libraries used in the project:
+- [`OpenSSL`](https://crates.io/crates/openssl) - For RSA and SHA256
+- [`XORCryptor (XRC)`](https://crates.io/crates/xor_cryptor) - For customized strong XOR encryption
+- [`Base64`](https://crates.io/crates/base64) - For Base64 encoding and decoding
+
 ## Flow
 
 Here is a flow diagram of how the API works.
