@@ -42,7 +42,7 @@ impl ValidDuration {
         match self {
             ValidDuration::Minute => "1 minute",
             ValidDuration::QuarterHour => "15 minutes",
-            ValidDuration::HalfHour => "60 minutes",
+            ValidDuration::HalfHour => "30 minutes",
         }
     }
 }
