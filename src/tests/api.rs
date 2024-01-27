@@ -91,9 +91,9 @@ async fn decrypt_req(body: Body) -> Response<Body> {
 
 async fn req(body: Body, uri: &'static str) -> Response<Body> {
     let app = App::init().await;
-    let router = server::get_router(app).await;
+    let router = server::get_router(app.clone()).await;
 
-    router
+    let response = router
         .oneshot(
             Request::builder()
                 .method(Method::POST)
@@ -103,7 +103,10 @@ async fn req(body: Body, uri: &'static str) -> Response<Body> {
                 .unwrap(),
         )
         .await
-        .unwrap()
+        .unwrap();
+
+    app.terminate().await;
+    response
 }
 
 // Consumes body and prints
