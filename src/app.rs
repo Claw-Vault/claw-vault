@@ -13,7 +13,7 @@ use sea_orm::DatabaseConnection;
 ///
 /// This struct is passed on to every API path.
 ///
-/// All instances are hold in [`Arc`]
+/// All instances are held in [`Arc`]
 /// to minimize cloning cost for every request
 /// being handled.
 #[derive(Clone)]
@@ -142,28 +142,40 @@ impl IntoResponse for HtmlTemplate {
 
 /// Enum for customize and handling errors
 pub enum AppError {
-    BadRequest(&'static str),
-    InvalidBody(JsonRejection),
-    ServerError(&'static str),
-    DbError(&'static str),
+    BadRequest(String, String, &'static str),
+    NotFound(String, String, &'static str),
+    InvalidBody(String, String, JsonRejection),
+    ServerError(String, String, &'static str),
+    DbError(String, String, &'static str),
 }
 
 impl IntoResponse for AppError {
     /// Function to map errors into appropriate responses
     fn into_response(self) -> Response {
-        let (status, message) = match self {
-            AppError::InvalidBody(_) => (StatusCode::BAD_REQUEST, "Invalid payload"),
-            AppError::BadRequest(err) => (StatusCode::BAD_REQUEST, err),
-            AppError::ServerError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err),
-            AppError::DbError(err) => (StatusCode::INTERNAL_SERVER_ERROR, err),
+        let (status, id, message, user_message) = match self {
+            AppError::InvalidBody(id, msg, _) => {
+                (StatusCode::BAD_REQUEST, id, msg, "Invalid payload")
+            }
+            AppError::BadRequest(id, msg, err) => (StatusCode::BAD_REQUEST, id, msg, err),
+            AppError::NotFound(id, msg, err) => (StatusCode::NOT_FOUND, id, msg, err),
+            AppError::ServerError(id, msg, err) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, id, msg, err)
+            }
+            AppError::DbError(id, msg, err) => (StatusCode::INTERNAL_SERVER_ERROR, id, msg, err),
         };
 
-        (status, Json(dto::ErrorMessage::new(status, message))).into_response()
+        match status {
+            StatusCode::INTERNAL_SERVER_ERROR => tracing::error!(req_id = id, message),
+            _ => tracing::warn!(req_id = id, message),
+        };
+
+        (status, Json(dto::ErrorMessage::new(status, user_message))).into_response()
     }
 }
 
 impl From<JsonRejection> for AppError {
     fn from(rejection: JsonRejection) -> Self {
-        Self::InvalidBody(rejection)
+        let nil = String::from("<nil>");
+        Self::InvalidBody(nil.clone(), nil, rejection)
     }
 }

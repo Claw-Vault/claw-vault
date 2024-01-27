@@ -1,16 +1,10 @@
-use std::{sync::Arc, time::Duration};
+use std::sync::Arc;
 
-use axum::{
-    http::{Request, StatusCode},
-    response::Response,
-    Extension, Router,
-};
-use tower_http::trace::TraceLayer;
-use tracing::Span;
+use axum::{Extension, Router};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{app::App, handlers, middleware, routes};
+use crate::{app::App, core::interceptor, handlers, routes};
 
 /// Serves axum backend server
 pub async fn serve(app: Arc<App>, notify: Arc<tokio::sync::Notify>) {
@@ -38,28 +32,7 @@ pub async fn get_router(app: Arc<App>) -> Router {
         .merge(swagger)
         .fallback(handlers::fallback_handler)
         .layer(Extension(app))
-        .layer(
-            TraceLayer::new_for_http().on_request(|req: &Request<_>, _: &Span| {
-                let req_id = get_header(middleware::X_REQUEST_ID, req.headers());
-                tracing::info!(req_id = req_id, method = ?req.method(), uri=?req.uri());
-            }),
-        )
-        .layer(axum::middleware::from_fn(middleware::request_id))
-        .layer(TraceLayer::new_for_http().on_response(
-            |res: &Response, latency: Duration, _: &Span| {
-                let req_id = get_header(middleware::X_REQUEST_ID, res.headers());
-                let message = format!(
-                    "Completed with status {} in {} ms",
-                    res.status(),
-                    latency.as_millis()
-                );
-                match res.status() {
-                    StatusCode::OK => tracing::info!(req_id = req_id, message),
-                    StatusCode::INTERNAL_SERVER_ERROR => tracing::error!(req_id = req_id, message),
-                    _ => tracing::warn!(req_id = req_id, message),
-                }
-            },
-        ))
+        .layer(axum::middleware::from_fn(interceptor::intercept))
 }
 
 /// Returns socket address for binding
@@ -97,16 +70,5 @@ pub async fn shutdown_signal(notify: Arc<tokio::sync::Notify>) {
     tokio::select! {
         _ = ctrl_c => {notify.notify_waiters()},
         _ = terminate => {notify.notify_waiters()},
-    }
-}
-
-fn get_header<T>(header: T, headers: &axum::http::HeaderMap) -> &str
-where
-    T: axum::http::header::AsHeaderName,
-{
-    if let Some(v) = headers.get(header) {
-        v.to_str().unwrap_or("<nil>")
-    } else {
-        "<nil>"
     }
 }

@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use chrono::Utc;
-use sea_orm::{ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, EntityTrait, Set};
-
-use crate::app::AppError;
+use sea_orm::{
+    ActiveModelTrait, ConnectOptions, Database, DatabaseConnection, DbErr, EntityTrait, Set,
+};
 
 use super::models::{claw, claw_keys};
 
@@ -34,7 +34,7 @@ pub async fn save_claw(
     hash: String,
     validity: i64,
     db: &DatabaseConnection,
-) -> Result<claw::Model, AppError> {
+) -> Result<claw::Model, DbErr> {
     let model = claw::ActiveModel {
         id: Set(id),
         data: Set(data),
@@ -44,10 +44,7 @@ pub async fn save_claw(
     };
     match model.insert(db).await {
         Ok(v) => Ok(v),
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to save claw"))
-        }
+        Err(err) => Err(err),
     }
 }
 
@@ -56,42 +53,33 @@ pub async fn save_claw_key(
     id: String,
     pem: String,
     db: &DatabaseConnection,
-) -> Result<claw_keys::Model, AppError> {
+) -> Result<claw_keys::Model, DbErr> {
     let model = claw_keys::ActiveModel {
         id: Set(id),
         pem: Set(pem),
     };
     match model.insert(db).await {
         Ok(v) => Ok(v),
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to save claw_key"))
-        }
+        Err(err) => Err(err),
     }
 }
 
 /// Function to get [`claw`] by `id`
-pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw::Model, AppError> {
+pub async fn get_claw_by_id(id: String, db: &DatabaseConnection) -> Result<claw::Model, DbErr> {
     match claw::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
             Some(model) => Ok(model),
-            None => Err(AppError::BadRequest("No data for id")),
+            None => Err(DbErr::RecordNotFound(String::from("No data for id"))),
         },
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to get claw by id"))
-        }
+        Err(err) => Err(err),
     }
 }
 
 /// Function to get all [`claw`]
-pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, AppError> {
+pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, DbErr> {
     match claw::Entity::find().all(db).await {
         Ok(claws) => Ok(claws),
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to get all claws"))
-        }
+        Err(err) => Err(err),
     }
 }
 
@@ -99,28 +87,22 @@ pub async fn get_all_claws(db: &DatabaseConnection) -> Result<Vec<claw::Model>, 
 pub async fn get_claw_key_by_id(
     id: String,
     db: &DatabaseConnection,
-) -> Result<claw_keys::Model, AppError> {
+) -> Result<claw_keys::Model, DbErr> {
     match claw_keys::Entity::find_by_id(id).one(db).await {
         Ok(model) => match model {
             Some(model) => Ok(model),
-            None => Err(AppError::BadRequest("No key for id")),
+            None => Err(DbErr::RecordNotFound(String::from("No key for id"))),
         },
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to get claw_key by id"))
-        }
+        Err(err) => Err(err),
     }
 }
 
 /// Function to delete the [`claw`]
 ///
 /// This automatically deletes the [`claw_key`] (foreign key constraint)
-pub async fn delete_claw(id: String, db: &DatabaseConnection) -> Result<bool, AppError> {
+pub async fn delete_claw(id: String, db: &DatabaseConnection) -> Result<bool, DbErr> {
     match claw::Entity::delete_by_id(id).exec(db).await {
         Ok(model) => Ok(model.rows_affected == 1),
-        Err(err) => {
-            tracing::error!("DBErr: {}", err);
-            Err(AppError::DbError("DBErr: Failed to delete claw"))
-        }
+        Err(err) => Err(err),
     }
 }

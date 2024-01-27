@@ -29,6 +29,10 @@ impl CipherError {
             CipherError::DecryptErr => "Failed to decrypt the data",
         }
     }
+
+    pub fn string(&self) -> String {
+        String::from(self.as_str())
+    }
 }
 
 /// Struct for handling cipher operations such as

@@ -1,13 +1,11 @@
 use std::sync::Arc;
 
 use tracing::Level;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 mod app;
 mod core;
 mod handlers;
-mod middleware;
 mod routes;
 mod server;
 mod tests;
