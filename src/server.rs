@@ -4,7 +4,10 @@ use axum::{Extension, Router};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{app::App, core::interceptor, handlers, routes};
+use crate::{
+    core::{app::App, interceptor},
+    handlers, routes,
+};
 
 /// Serves axum backend server
 pub async fn serve(app: Arc<App>, notify: Arc<tokio::sync::Notify>) {

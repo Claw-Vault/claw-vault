@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
-use crate::core::{cipher, dao, dto};
 use axum::{
     extract::{rejection::JsonRejection, FromRequest},
     http::StatusCode,
     response::{Html, IntoResponse, Response},
 };
 use sea_orm::DatabaseConnection;
+
+use crate::core::{cipher, dao, dto};
 
 /// Struct to hold instances of common objects
 /// in app.

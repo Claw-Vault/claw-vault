@@ -3,7 +3,6 @@ use std::sync::Arc;
 use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod app;
 mod core;
 mod handlers;
 mod routes;
@@ -22,7 +21,7 @@ async fn main() {
     dotenv::dotenv().ok();
 
     // initialize app
-    let app = app::App::init().await;
+    let app = core::app::App::init().await;
 
     // initialize notifier - used for signaling jobs
     let notify = Arc::new(tokio::sync::Notify::new());

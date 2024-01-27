@@ -5,7 +5,7 @@ use axum::{
 use http_body_util::BodyExt;
 use tower::ServiceExt;
 
-use crate::{app::App, server};
+use crate::{core::app::App, server};
 
 #[tokio::test]
 async fn encrypt_empty_body() {

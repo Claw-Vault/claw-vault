@@ -1,6 +1,7 @@
-use crate::handlers::api;
 use axum::routing::post;
 use axum::Router;
+
+use crate::handlers::api;
 
 /// Binds routes for [`api`]
 ///

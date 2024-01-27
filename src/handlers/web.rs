@@ -2,9 +2,9 @@ use std::sync::Arc;
 
 use axum::{extract::Path, http::StatusCode, Extension};
 
-use crate::{
+use crate::core::{
     app::{App, AppError, HtmlTemplate},
-    core::dao,
+    dao,
 };
 
 pub async fn index(Extension(app): Extension<Arc<App>>) -> Result<HtmlTemplate, AppError> {

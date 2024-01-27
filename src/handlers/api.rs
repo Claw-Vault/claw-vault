@@ -4,11 +4,10 @@ use std::sync::Arc;
 use axum::Extension;
 use uuid::Uuid;
 
-use crate::core::dao;
 use crate::core::dto::RequestStruct;
-use crate::{
+use crate::core::{
     app::{App, AppError, Json},
-    core::dto,
+    dao, dto,
 };
 
 /// Api to encrypt data
@@ -55,7 +54,7 @@ pub async fn encrypt(
                 req_id,
                 format!("Failed to save claw: {}", err),
                 "Failed to save claw",
-            ))
+            ));
         }
     };
     // save claw key
@@ -66,7 +65,7 @@ pub async fn encrypt(
                 req_id,
                 format!("Failed to save claw_key: {}", err),
                 "Failed to save claw_key",
-            ))
+            ));
         }
     };
 
@@ -105,7 +104,7 @@ pub async fn decrypt(
                 req_id,
                 String::from("Bad key"),
                 "Bad key",
-            ))
+            ));
         }
     };
 
@@ -122,7 +121,7 @@ pub async fn decrypt(
                 req_id,
                 format!("Failed to get claw: {}", err),
                 "No data for ID",
-            ))
+            ));
         }
     };
 
@@ -134,7 +133,7 @@ pub async fn decrypt(
                 req_id,
                 format!("Failed to get claw_key: {}", err),
                 "No key for data",
-            ))
+            ));
         }
     };
 
@@ -146,7 +145,7 @@ pub async fn decrypt(
                 req_id,
                 format!("Failed to decrypt pem: {}", err.as_str()),
                 err.as_str(),
-            ))
+            ));
         }
     };
 
@@ -158,7 +157,7 @@ pub async fn decrypt(
                 req_id,
                 format!("Failed to decrypt data: {}", err.as_str()),
                 err.as_str(),
-            ))
+            ));
         }
     };
 
@@ -177,9 +176,9 @@ pub async fn decrypt(
         Err(err) => {
             return Err(AppError::DbError(
                 req_id,
-                format!("Failed to decrypt data: {}", err.to_string()),
+                format!("Failed to decrypt data: {}", err),
                 "Error cleaning footprints",
-            ))
+            ));
         }
     }
 

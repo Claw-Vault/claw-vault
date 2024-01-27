@@ -2,8 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use sea_orm::ActiveEnum;
 
-use crate::app::App;
-
+use super::app::App;
 use super::dao;
 
 /// Schedules cleaner to run periodically

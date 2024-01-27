@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use axum::{http::StatusCode, Extension};
 
-use crate::app::{App, HtmlTemplate};
+use crate::core::app::{App, HtmlTemplate};
 
 pub mod api;
 pub mod web;
