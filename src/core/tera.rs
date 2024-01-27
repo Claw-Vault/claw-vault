@@ -614,8 +614,7 @@ pub fn add_vault(tera: &mut tera::Tera) {
                                 </div>
                                 <div class="mt-10 flex items-center gap-x-6">
                                     <button
-                                        class="inline-flex items-center gap-x-2 rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-[#9AD4D8] shadow-sm hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-                                        onclick="decryptData()">
+                                        class="inline-flex items-center gap-x-2 rounded-md bg-gray-900 px-3.5 py-2.5 text-sm font-semibold text-[#9AD4D8] shadow-sm hover:bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
                                         <svg class="-ml-0.5 h-5 w-5" xmlns="http://www.w3.org/2000/svg"
                                             viewBox="0 0 448 512" fill="currentColor">
                                             <!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
