@@ -1,5 +1,5 @@
 use axum::routing::{get, Router};
-use tower_http::services::ServeDir;
+use tower_http::services::{ServeDir, ServeFile};
 
 use crate::handlers::web;
 
@@ -13,6 +13,7 @@ pub fn bind_routes(router: Router) -> Router {
             "/assets",
             ServeDir::new(std::env::var("ASSETS_DIR").unwrap()),
         )
+        .route_service("/robots.txt", ServeFile::new("assets/robots.txt"))
         .route("/privacy", get(web::privacy))
         .route("/:id", get(web::vault))
 }
