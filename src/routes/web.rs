@@ -13,7 +13,7 @@ pub fn bind_routes(router: Router) -> Router {
             "/assets",
             ServeDir::new(std::env::var("ASSETS_DIR").unwrap()),
         )
-        .route_service("/robots.txt", ServeFile::new("assets/robots.txt"))
+        .route_service("/robots.txt", ServeFile::new(std::env::var("ASSETS_DIR").unwrap()+"/robots.txt"))
         .route("/privacy", get(web::privacy))
         .route("/:id", get(web::vault))
 }
