@@ -1,6 +1,6 @@
 [package]
 name = "claw-vault"
-version = "0.1.1"
+version = "0.1.0"
 edition = "2021"
 authors = ["Shashank Verma <shashank.verma2002@gmail.com>"]
 license = "MIT"
@@ -8,46 +8,6 @@ description = "A platform to share sensitive information with desired recipients
 repository = "https://github.com/Claw-Vault/claw-vault"
 readme = "README.md"
 keywords = ["rsa", "xrc", "encryption", "decryption", "vault", "claw", "share"]
-rust-version = "1.75"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+rust-version = "1.80"
 
 [dependencies]
-tokio = { version = "1.35.1", features = ["full", "rt-multi-thread"] }
-dotenv = "0.15.0"
-tera = "1.19.1"
-
-# http
-axum = { version = "0.7.4", features = ["macros"] }
-serde = { version = "1.0.195", features = ["derive"] }
-tower-http = { version = "0.5.1", features = ["fs", "trace"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-
-# swagger
-utoipa = { version = "4.2.0", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
-
-# cryptography
-uuid = { version = "1.7.0", features = ["v4"] }
-openssl = { version = "0.10", features = ["vendored"] }
-rand = "0.8.5"
-base64 = "0.21.7"
-hex = "0.4.3"
-xor_cryptor = "1.2.0"
-
-#db
-sea-orm = { version = "0.12", features = [
-    "sqlx-postgres",
-    "runtime-tokio-native-tls",
-    "macros",
-] }
-chrono = "0.4.31"
-
-[profile.release]
-strip = true
-lto = true
-
-[dev-dependencies]
-tower = "0.4.13"
-http-body-util = "0.1.0"
