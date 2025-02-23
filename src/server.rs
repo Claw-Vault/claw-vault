@@ -1,6 +1,6 @@
 use std::{net::SocketAddr, sync::Arc};
 
-use axum::{extract::Request, http::HeaderValue, Router};
+use axum::{extract::Request, Router};
 use futures::{pin_mut, FutureExt};
 use hyper::body::Incoming;
 use hyper_util::{
@@ -13,7 +13,6 @@ use tokio::{
     signal,
 };
 use tower::Service;
-use tower_http::cors::Any;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -121,12 +120,6 @@ pub async fn get_router(app: app::App) -> Router {
         .fallback(routes::fallback::fallback_handler)
         .layer(axum::middleware::from_fn(lib_core::interceptor::intercept))
         .layer(tower_http::trace::TraceLayer::new_for_http())
-        .layer(
-            tower_http::cors::CorsLayer::new()
-                .allow_origin(Any)
-                .allow_headers(Any)
-                .allow_methods(Any),
-        )
         .with_state(app)
 }
 

@@ -61,7 +61,7 @@ hyper-util = { version = "=0.1.9", features = [
     "http1",
 ] }
 axum = { version = "=0.7.7", features = ["macros", "multipart"] }
-tower-http = { version = "=0.6.1", features = ["fs", "trace", "cors"] }
+tower-http = { version = "=0.6.1", features = ["fs", "trace"] }
 tower = { version = "=0.5.1", features = ["util"] }
 tracing = "=0.1.40"
 tracing-subscriber = { version = "=0.3", features = ["env-filter", "json"] }
