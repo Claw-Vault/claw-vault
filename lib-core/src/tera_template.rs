@@ -212,7 +212,8 @@ fn add_index(tera: &mut tera::Tera) {
                                     <div class="mt-2 flex">
                                         <input id="dec-id" name="id" type="text" autocomplete="off"
                                             class="flex-grow max-w-96 rounded-md px-2 border-0 bg-gray-900/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-900/10 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
-                                            placeholder="ID" required>
+                                            placeholder="ID"
+                                            required>
                                     </div>
                                 </div>
                                 <div class="mt-10 flex items-center gap-x-6">
@@ -367,14 +368,14 @@ fn add_index(tera: &mut tera::Tera) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    value: data,
+                    data,
                     validity: valid,
                 })
             }).then((res) => {
                 if (res.status == 200) {
                     res.json().then((data) => {
-                        document.getElementById('enc-url').value = data.data_id;
-                        document.getElementById('enc-key').value = data.key_id;
+                        document.getElementById('enc-url').value = data.id;
+                        document.getElementById('enc-key').value = data.key;
                         document.getElementById('enc-valid').innerHTML = 'Valid for ' + data.valid_for;
                         document.getElementById('progress').classList.add('hidden');
                         document.getElementById('modal-data').classList.remove('hidden');
@@ -419,8 +420,8 @@ fn add_index(tera: &mut tera::Tera) {
                 return;
             }
 
-            var clipboard = "ID: " + document.getElementById('enc-url').value + "\nKey: " + document.getElementById('enc-key').value;
-            navigator.clipboard.writeText(clipboard).then(() => toggleDialog(false), () => toggleDialog(false));
+            var data = document.getElementById('enc-url').value + "." + document.getElementById('enc-key').value;
+            navigator.clipboard.writeText(data).then(() => toggleDialog(false), () => toggleDialog(false));
         }
 
         function toggleDialog(show) {

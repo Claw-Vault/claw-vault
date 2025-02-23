@@ -79,7 +79,7 @@ where
 /// Struct for rendering html templates
 pub struct HtmlTemplate {
     pub tera: Arc<tera::Tera>,
-    pub name: &'static str,
+    pub template: &'static str,
     pub status: Option<StatusCode>,
     pub ctx: Option<tera::Context>,
 }
@@ -87,7 +87,7 @@ pub struct HtmlTemplate {
 impl IntoResponse for HtmlTemplate {
     /// Function to render the provided template
     fn into_response(self) -> Response {
-        let HtmlTemplate { tera, name, status, ctx } = self;
+        let HtmlTemplate { tera, template: name, status, ctx } = self;
         let ctx = ctx.unwrap_or(tera::Context::new());
 
         let status_code = status.unwrap_or(StatusCode::OK);
@@ -150,7 +150,12 @@ impl AppError {
 
     fn init(_type: ErrType, err: Option<Box<dyn Error>>, message: impl Into<String>) -> Self {
         let at = AppError::caller();
-        AppError { _type, message: message.into(), at, err_msg: err.map(|e| e.to_string()).unwrap_or("".into()) }
+        AppError {
+            _type,
+            message: message.into(),
+            at,
+            err_msg: err.map(|e| e.to_string()).unwrap_or("".into()),
+        }
     }
 
     fn caller() -> String {
@@ -167,7 +172,10 @@ impl AppError {
                 _ => return,
             };
 
-            let file_name = file_path.file_name().map(|f| f.to_string_lossy().to_string()).unwrap_or_else(|| "".into());
+            let file_name = file_path
+                .file_name()
+                .map(|f| f.to_string_lossy().to_string())
+                .unwrap_or_else(|| "".into());
             let lineno = symbol.lineno().unwrap_or(0);
             let colno = symbol.colno().unwrap_or(0);
             file_addr = format!("{}:{}:{}", file_name, lineno, colno);
@@ -248,6 +256,9 @@ where
 
 impl From<JsonRejection> for ApiResponse<()> {
     fn from(rejection: JsonRejection) -> Self {
-        ApiResponse::Err(AppError::err(ErrType::InvalidBody, rejection, "Invalid payload"), "".into())
+        ApiResponse::Err(
+            AppError::err(ErrType::InvalidBody, rejection, "Invalid payload"),
+            "".into(),
+        )
     }
 }

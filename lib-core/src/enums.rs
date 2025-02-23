@@ -1,18 +1,30 @@
 use serde::{Deserialize, Serialize};
 
+#[derive(Clone, Copy)]
 pub enum ValidDuration {
-    Minute = 60,
-    QuarterHour = 900,
-    HalfHour = 1800,
+    Minute,
+    QuarterHour,
+    HalfHour,
 }
 
 impl ValidDuration {
+    /// Returns duration in seconds
     pub fn get_duration(&self) -> i16 {
         match self {
             ValidDuration::Minute => 60,
             ValidDuration::QuarterHour => 900,
             ValidDuration::HalfHour => 1800,
         }
+    }
+
+    /// Returns human readable string
+    pub fn to_string(&self) -> String {
+        match self {
+            ValidDuration::Minute => "1 minute",
+            ValidDuration::QuarterHour => "15 minutes",
+            ValidDuration::HalfHour => "30 minutes",
+        }
+        .into()
     }
 }
 

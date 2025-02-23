@@ -5,49 +5,86 @@ edition = "2021"
 authors = ["Shashank Verma <shashank.verma2002@gmail.com>"]
 license = "MIT"
 description = "A platform to share sensitive information with desired recipients."
-repository = "https://github.com/Claw-Vault/claw-vault"
+repository = "https://github.com/Claw-Vault"
 readme = "README.md"
 keywords = ["rsa", "xrc", "encryption", "decryption", "vault", "claw", "share"]
-rust-version = "1.75"
+rust-version = "1.83"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace]
+resolver = "2"
+members = ["lib-core", "lib-domain"]
+
 [dependencies]
-tokio = { version = "1.35.1", features = ["full", "rt-multi-thread"] }
-dotenv = "0.15.0"
-tera = "1.19.1"
+lib-core = { path = "lib-core" }
+lib-domain = { path = "lib-domain" }
+
+# rt
+futures = { workspace = true }
+tokio = { workspace = true }
+dotenv = "=0.15.0"
 
 # http
-axum = { version = "0.7.4", features = ["macros"] }
-serde = { version = "1.0.195", features = ["derive"] }
-tower-http = { version = "0.5.1", features = ["fs", "trace"] }
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+hyper = { workspace = true }
+hyper-util = { workspace = true }
+axum = { workspace = true }
+tower-http = { workspace = true }
+tower = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# dto
+serde = { workspace = true }
+serde_json = { workspace = true }
+validator = { workspace = true }
 
 # swagger
-utoipa = { version = "4.2.0", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "6.0.0", features = ["axum"] }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
 
-# cryptography
-uuid = { version = "1.7.0", features = ["v4"] }
-openssl = { version = "0.10", features = ["vendored"] }
-rand = "0.8.5"
-base64 = "0.21.7"
-hex = "0.4.3"
-xor_cryptor = "1.2.0"
+tera = { workspace = true }
 
-#db
-sea-orm = { version = "0.12", features = [
-    "sqlx-postgres",
-    "runtime-tokio-native-tls",
-    "macros",
+[workspace.dependencies]
+# rt
+futures = "=0.3.30"
+tokio = { version = "=1.42.0", features = ["full", "rt-multi-thread"] }
+
+# http
+hyper = "=1.5.0"
+hyper-util = { version = "=0.1.9", features = [
+    "tokio",
+    "server-auto",
+    "http1",
 ] }
-chrono = "0.4.31"
+axum = { version = "=0.7.7", features = ["macros", "multipart"] }
+tower-http = { version = "=0.6.1", features = ["fs", "trace", "cors"] }
+tower = { version = "=0.5.1", features = ["util"] }
+tracing = "=0.1.40"
+tracing-subscriber = { version = "=0.3", features = ["env-filter", "json"] }
+
+# dto
+serde = { version = "=1.0.210", features = ["derive"] }
+serde_json = { version = "=1.0.128" }
+validator = { version = "=0.18.1", features = ["derive"] }
+
+# swagger
+utoipa = { version = "=5.0.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "=8.0.0", features = ["axum"] }
+
+# db
+surrealdb = "=2.2.1"
+chrono = "=0.4.39"
+
+tera = "1.19.1"
 
 [profile.release]
 strip = true
-lto = true
+# lto = true
 
 [dev-dependencies]
-tower = "0.4.13"
-http-body-util = "0.1.0"
+tower = { version = "0.4.13", features = ["util"] }
+http-body-util = "=0.1.2"
