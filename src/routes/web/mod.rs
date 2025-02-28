@@ -12,5 +12,5 @@ pub fn bind_routes(router: Router<App>) -> Router<App> {
         .nest_service("/assets", ServeDir::new(Config::get_assets_dir()))
         .route_service("/robots.txt", ServeFile::new(Config::get_assets_dir() + "/robots.txt"))
         .route("/privacy", get(api::privacy))
-        .route("/vault", get(api::vault))
+        .route("/vault/:id", get(api::vault))
 }

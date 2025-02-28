@@ -343,7 +343,7 @@ fn add_index(tera: &mut tera::Tera) {
                 return;
             }
             document.getElementById('dec-id').value = "";
-            window.location.href = '/' + id;
+            window.location.href = '/vault/' + id;
         }
 
         function encryptData() {

@@ -1,5 +1,5 @@
 use axum::{
-    extract::{Query, State},
+    extract::{Path, State},
     http::StatusCode,
 };
 use lib_core::HtmlTemplate;
@@ -16,7 +16,7 @@ pub async fn privacy(State(app): State<App>) -> HtmlTemplate {
 
 pub async fn vault(
     State(app): State<App>,
-    Query(id): Query<String>,
+    Path(id): Path<String>,
 ) -> Result<HtmlTemplate, HtmlTemplate> {
     let err_template = HtmlTemplate {
         tera: app.tera(),
