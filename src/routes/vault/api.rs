@@ -1,5 +1,5 @@
-use axum::extract::State;
-use axum::Extension;
+use axum::extract::{Path, State};
+use axum::{http::StatusCode, Extension};
 use lib_core::interceptor::ReqId;
 use lib_core::{ApiResponse, EmptyResponse, Json};
 use lib_domain::dto::vault::req::{DecryptRequest, EncryptRequest};
@@ -43,4 +43,26 @@ pub async fn decrypt(
     Json(dto): Json<DecryptRequest>,
 ) -> ApiResponse<DecryptResponse> {
     ApiResponse::map_res(app.service().decrypt_data(dto).await, req_id)
+}
+
+/// Check if claw exists
+#[utoipa::path(
+    get,
+    path = "/api/v1/claw/{claw-id}",
+    responses(
+        (status=200, description="Requested Claw exists", body = EmptyResponse),
+        (status=400, description="Error", body = EmptyResponse),
+    ),
+    params(("claw-id" = String, Path, description = "Claw ID")),
+    tag = "Api",
+)]
+pub async fn has_claw(
+    State(app): State<App>,
+    Extension(req_id): Extension<ReqId>,
+    Path(id): Path<String>,
+) -> ApiResponse<EmptyResponse> {
+    ApiResponse::map_res(
+        app.service().has_claw(id).await.map(|_| EmptyResponse::new(StatusCode::OK, "Claw found")),
+        req_id,
+    )
 }

@@ -41,7 +41,7 @@ pub fn bind_routes(router: Router<App>) -> Router<App> {
             url = "https://raw.githubusercontent.com/Claw-Vault/claw-vault/refs/heads/main/LICENSE"
         ),
     ),
-    paths(health::health, vault::api::encrypt, vault::api::decrypt),
+    paths(health::health, vault::api::encrypt, vault::api::decrypt, vault::api::has_claw),
     components(schemas(
         lib_core::enums::ValidDuration,
         lib_core::EmptyResponse,

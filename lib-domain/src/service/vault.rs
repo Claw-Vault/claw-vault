@@ -39,4 +39,10 @@ impl Service {
 
         Ok(DecryptResponse { data })
     }
+
+    pub async fn has_claw(&self, id: String) -> AppResult<()> {
+        let claw = self.ds.get_claw(&id).await?;
+        claw.map(|_| ())
+            .ok_or_else(|| AppError::new(ErrType::NotFound, "Requested claw doesn't exists"))
+    }
 }
