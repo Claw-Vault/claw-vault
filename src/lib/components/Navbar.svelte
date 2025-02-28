@@ -8,7 +8,7 @@
 </script>
 
 <header
-    class="sticky inset-x-0 top-0 z-30 text-brand-dark bg-white dark:text-white dark:bg-slate-900"
+    class="sticky inset-x-0 top-0 z-30 text-brand-dark bg-white dark:text-white dark:bg-brand-dark"
 >
     <nav class="flex items-center justify-between px-6 py-4 lg:px-8">
         <div class="flex lg:flex-1 flex-row items-center">

@@ -4,7 +4,7 @@
     import EncryptBlock from "./EncryptBlock.svelte";
 </script>
 
-<section class="relative isolate overflow-hidden bg-white">
+<section id="claw" class="relative isolate overflow-hidden bg-white dark:bg-brand-dark">
     <BackPattern />
 
     <div

@@ -5,7 +5,7 @@
     import ClawHome from "$lib/components/ClawHome.svelte";
 </script>
 
-<section class="relative isolate pt-14 bg-white">
+<section class="relative isolate pt-14 bg-white dark:bg-brand-dark">
     <BackPattern />
 
     <div
@@ -16,11 +16,13 @@
         </div>
         <div class="mx-auto max-w-2xl lg:mx-0 lg:flex-auto justify-center">
             <h1
-                class="mt-10 max-w-lg text-4xl font-bold tracking-tight text-brand-dark sm:text-6xl"
+                class="mt-10 max-w-lg text-3xl font-bold tracking-tight text-brand-dark dark:text-brand sm:text-5xl"
             >
                 A better way to share private data
             </h1>
-            <p class="mt-6 text-lg leading-8 font-semibold text-brand-dark/70">
+            <p
+                class="mt-6 text-base sm:text-lg sm:leading-8 font-semibold text-brand-dark/70 dark:text-brand/70"
+            >
                 Claw Vault encrypts your data, providing a unique ID and key for secure
                 transmission. Your recipient can easily access the encrypted content using the ID
                 and key, ensuring confidentiality. Data is automatically deleted upon access or
@@ -36,7 +38,7 @@
                 <a
                     href={GITHUB_LINK}
                     target="_blank"
-                    class="text-sm font-semibold leading-6 text-brand-dark"
+                    class="text-sm font-semibold leading-6 text-brand-dark dark:text-brand"
                 >
                     View on GitHub
                     <span aria-hidden="true">→</span>

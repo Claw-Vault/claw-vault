@@ -19,7 +19,7 @@ const config = {
                 brand: {
                     DEFAULT: "#9AD4D8",
                     // dark: "#244F5F",
-                    dark: "#193945",
+                    dark: "#13242e",
                 },
                 border: "hsl(var(--border) / <alpha-value>)",
                 input: "hsl(var(--input) / <alpha-value>)",
