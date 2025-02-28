@@ -1,6 +1,5 @@
 export const enum Routes {
     Home = "/",
-    Vault = "/vault",
     Privacy = "/privacy",
 }
 

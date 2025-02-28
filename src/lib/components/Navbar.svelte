@@ -12,7 +12,7 @@
 >
     <nav class="flex items-center justify-between px-6 py-4 lg:px-8">
         <div class="flex lg:flex-1 flex-row items-center">
-            <a href="/" class="flex justify-center items-center text-lg font-medium">
+            <a href={Routes.Home} class="flex justify-center items-center text-lg font-medium">
                 <img class="w-12 mr-4 rounded-full" src={clawVaultLogo} alt="Claw Vault" />
                 Claw Vault
             </a>
@@ -41,12 +41,19 @@
         >
             <div class="flex items-center justify-between">
                 <div class="flex lg:flex-1 flex-col items-center">
-                    <a href="/" class="flex justify-center items-center text-lg font-semibold">
+                    <a
+                        href={Routes.Home}
+                        class="flex justify-center items-center text-lg font-medium"
+                    >
                         <img class="w-12 mr-4" src={clawVaultLogo} alt="Claw Vault" />
                         Claw Vault
                     </a>
                 </div>
-                <button type="button" class="-m-2.5 rounded-md p-2.5 text-gray-700">
+                <button
+                    type="button"
+                    class="-m-2.5 rounded-md p-2.5 text-brand"
+                    onclick={() => (showMobileMenu = false)}
+                >
                     <span class="sr-only">Close menu</span>
                     <X />
                 </button>
@@ -55,13 +62,15 @@
                 <div class="-my-6">
                     <div class="space-y-2 py-6">
                         <a
-                            href="https://github.com/Claw-Vault/claw-vault"
+                            href={GITHUB_LINK}
+                            onclick={() => (showMobileMenu = false)}
                             target="_blank"
                             class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-700"
                             >Github</a
                         >
                         <a
-                            href="/privacy"
+                            href={Routes.Privacy}
+                            onclick={() => (showMobileMenu = false)}
                             class="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-gray-700"
                         >
                             Privacy

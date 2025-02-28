@@ -51,10 +51,7 @@
             if (!open) {
                 return;
             }
-            open = false;
-            data = undefined;
-            remaining = 0;
-            timeStarted = false;
+            resetDialog();
         }, 15 * 1000);
     }
 
