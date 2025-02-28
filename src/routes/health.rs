@@ -1,10 +1,9 @@
 use axum::routing::{get, Router};
 
-/// Binds route for [`health`]
-///
-/// Returns a [`Router`]
-pub fn bind_routes(router: Router) -> Router {
-    router.route("/health", get(health))
+use crate::app::App;
+
+pub fn bind_routes() -> Router<App> {
+    Router::new().route("/health", get(health))
 }
 
 #[utoipa::path(

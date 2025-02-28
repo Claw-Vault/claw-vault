@@ -1,34 +1,55 @@
 use axum::routing::Router;
 use utoipa::OpenApi;
 
-mod api;
-mod health;
-mod web;
+use crate::app::App;
 
-/// Struct for [`OpenApi`] docs generation for [`utoipa_swagger_ui::SwaggerUi`]
-#[derive(OpenApi)]
-#[openapi(
-    paths(
-        health::health,
-        crate::handlers::api::encrypt,
-        crate::handlers::api::decrypt
-    ),
-    components(schemas(
-        crate::core::dto::EncryptQueryBody,
-        crate::core::dto::EncryptResponse,
-        crate::core::dto::DecryptQueryBody,
-        crate::core::dto::DecryptResponse,
-        crate::core::dto::ErrorMessage
-    ))
-)]
-pub struct ApiDoc;
+pub(crate) mod fallback;
+mod health;
+mod vault;
+mod web;
 
 /// Function to bind routes from:
 /// - [`health`]
-/// - [`api`]
+/// - [`vault`]
 /// - [`web`]
-pub fn bind_routes(router: Router) -> Router {
-    let router = health::bind_routes(router);
-    let router = api::bind_routes(router);
-    web::bind_routes(router)
+pub fn bind_routes(router: Router<App>) -> Router<App> {
+    // root level routes
+    let r = health::bind_routes();
+    let r = web::bind_routes(r);
+
+    // api level routes
+    let vault_routes = vault::bind_routes(Router::new());
+
+    router.merge(r).nest("/api/v1", vault_routes)
 }
+
+#[derive(OpenApi)]
+#[openapi(
+    info(
+        title = "ClawVault API Documentation",
+        description = r#"API documentation for ClawVault Backend.
+
+## Overview
+
+* https://claw-vault.up.railway.app
+
+#### Contact
+- [API Support](mailto:shashank.verma2002@gmail.com)"#,
+        contact(name = "API Support", email = "shashank.verma2002@gmail.com"),
+        license(
+            name = "MIT",
+            url = "https://raw.githubusercontent.com/Claw-Vault/claw-vault/refs/heads/main/LICENSE"
+        ),
+    ),
+    paths(health::health, vault::api::encrypt, vault::api::decrypt, vault::api::has_claw),
+    components(schemas(
+        lib_core::enums::ValidDuration,
+        lib_core::EmptyResponse,
+        lib_domain::dto::vault::req::EncryptRequest,
+        lib_domain::dto::vault::req::DecryptRequest,
+        lib_domain::dto::vault::res::EncryptResponse,
+        lib_domain::dto::vault::res::DecryptResponse,
+    )),
+    servers()
+)]
+pub struct ApiDoc;

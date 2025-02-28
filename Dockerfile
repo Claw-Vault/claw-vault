@@ -1,4 +1,4 @@
-FROM rust:1.76.0-alpine3.19 as builder
+FROM rust:1.83.0-alpine3.19 as builder
 
 WORKDIR /usr/src/app
 COPY . .
@@ -7,8 +7,10 @@ COPY . .
 RUN apk add --no-cache musl-dev perl-utils make
 
 ARG DATABASE_URL
-ENV TEMPLATE_DIR=templates
-ENV ASSETS_DIR=assets
+ARG DATABASE_USER
+ARG DATABASE_PASS
+ARG TEMPLATE_DIR
+ARG ASSETS_DIR
 ARG PORT
 
 # Build the application
@@ -23,7 +25,7 @@ COPY --from=builder /usr/local/cargo/bin/claw-vault /usr/local/bin/claw-vault
 COPY --from=builder /usr/src/app/templates /usr/local/bin/templates
 COPY --from=builder /usr/src/app/assets /usr/local/bin/assets
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Run the binary
 CMD [ "claw-vault" ]

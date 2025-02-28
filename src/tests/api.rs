@@ -3,9 +3,9 @@ use axum::{
     http::{header, Method, Request, Response, StatusCode},
 };
 use http_body_util::BodyExt;
-use tower::ServiceExt;
+use tower::util::ServiceExt;
 
-use crate::{core::app::App, server};
+use crate::{app, server};
 
 #[tokio::test]
 async fn encrypt_empty_body() {
@@ -17,29 +17,20 @@ async fn encrypt_empty_body() {
 
 #[tokio::test]
 async fn encrypt_1_min() {
-    encrypt_n_min(
-        r#"{ "validity": 0, "value": "random data" }"#,
-        r#""valid_for":"1 minute""#,
-    )
-    .await;
+    encrypt_n_min(r#"{ "validity": 60, "data": "random data" }"#, r#""valid_for":"1 minute""#)
+        .await;
 }
 
 #[tokio::test]
 async fn encrypt_15_mins() {
-    encrypt_n_min(
-        r#"{ "validity": 900, "value": "random data" }"#,
-        r#""valid_for":"15 minutes""#,
-    )
-    .await;
+    encrypt_n_min(r#"{ "validity": 900, "data": "random data" }"#, r#""valid_for":"15 minutes""#)
+        .await;
 }
 
 #[tokio::test]
 async fn encrypt_30_mins() {
-    encrypt_n_min(
-        r#"{ "validity": 1800, "value": "random data" }"#,
-        r#""valid_for":"30 minutes""#,
-    )
-    .await;
+    encrypt_n_min(r#"{ "validity": 1800, "data": "random data" }"#, r#""valid_for":"30 minutes""#)
+        .await;
 }
 
 async fn encrypt_n_min(body: &'static str, expected: &'static str) {
@@ -65,7 +56,7 @@ async fn decrypt_empty_body() {
 async fn decrypt() {
     dotenv::dotenv().ok();
 
-    let er = encrypt_req(Body::from(r#"{ "validity": 0, "value": "random data" }"#)).await;
+    let er = encrypt_req(Body::from(r#"{ "validity": 60, "data": "random data" }"#)).await;
     let eb = er.into_parts();
     let mut eb = get_body(eb.1).await;
     eb = eb.replace("data_id", "id");
@@ -90,7 +81,8 @@ async fn decrypt_req(body: Body) -> Response<Body> {
 }
 
 async fn req(body: Body, uri: &'static str) -> Response<Body> {
-    let app = App::init().await;
+    let app = app::init().await;
+    app.bootstrap().await;
     let router = server::get_router(app.clone()).await;
 
     let response = router
@@ -105,7 +97,6 @@ async fn req(body: Body, uri: &'static str) -> Response<Body> {
         .await
         .unwrap();
 
-    app.terminate().await;
     response
 }
 

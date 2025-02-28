@@ -1,8 +1,5 @@
 use std::{sync::Arc, time};
 
-use base64::Engine;
-use rand::RngCore;
-
 #[test]
 fn arc_clone_test() {
     let arr = String::from("Hello");
@@ -100,13 +97,10 @@ fn hex_str_bench() {
         sha.update(data.as_bytes());
         let hash = sha.finish();
 
-        let _ = hash
-            .iter()
-            .map(|i| format!("{:x}", i))
-            .fold(String::new(), |mut op, i| {
-                op += i.as_str();
-                op
-            });
+        let _ = hash.iter().map(|i| format!("{:x}", i)).fold(String::new(), |mut op, i| {
+            op += i.as_str();
+            op
+        });
     }
     let s = start.elapsed().as_millis();
     println!("fold_str: {} ms", s);
@@ -118,15 +112,12 @@ fn hex_str_bench() {
         sha.update(data.as_bytes());
         let hash = sha.finish();
 
-        let hash = hash
-            .iter()
-            .map(|b| format!("{:x}", b))
-            .fold(Vec::<u8>::new(), |mut vec, b| {
-                for i in b.as_bytes() {
-                    vec.push(*i)
-                }
-                vec
-            });
+        let hash = hash.iter().map(|b| format!("{:x}", b)).fold(Vec::<u8>::new(), |mut vec, b| {
+            for i in b.as_bytes() {
+                vec.push(*i)
+            }
+            vec
+        });
         let _ = String::from_utf8(hash).unwrap();
     }
     let v = start.elapsed().as_millis();

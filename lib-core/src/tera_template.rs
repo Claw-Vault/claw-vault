@@ -1,4 +1,22 @@
-pub fn add_404(tera: &mut tera::Tera) {
+use crate::config::Config;
+
+/// Setup tera for html templates
+///
+/// Expects `TEMPLATE_DIR` from env else panics
+///
+/// Returns [`tera::Tera`]
+pub fn setup_tera() -> tera::Tera {
+    let template_dir = Config::get_template_dir();
+    let template_dir = format!("{}/**/*.html", template_dir);
+    let mut tera = tera::Tera::new(&template_dir).expect("Failed to initialize Tera");
+    add_404(&mut tera);
+    add_index(&mut tera);
+    add_privacy(&mut tera);
+    add_vault(&mut tera);
+    tera
+}
+
+fn add_404(tera: &mut tera::Tera) {
     let source = r#"
 <!DOCTYPE html>
 <html lang="en">
@@ -43,11 +61,10 @@ pub fn add_404(tera: &mut tera::Tera) {
 
 </html>"#;
 
-    tera.add_raw_template("404.html", source)
-        .expect("Failed to add 404 template")
+    tera.add_raw_template("404.html", source).expect("Failed to add 404 template")
 }
 
-pub fn add_index(tera: &mut tera::Tera) {
+fn add_index(tera: &mut tera::Tera) {
     let source = r#"
 <!DOCTYPE html>
 <html lang="en">
@@ -195,7 +212,8 @@ pub fn add_index(tera: &mut tera::Tera) {
                                     <div class="mt-2 flex">
                                         <input id="dec-id" name="id" type="text" autocomplete="off"
                                             class="flex-grow max-w-96 rounded-md px-2 border-0 bg-gray-900/5 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-900/10 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6"
-                                            placeholder="ID" required>
+                                            placeholder="ID"
+                                            required>
                                     </div>
                                 </div>
                                 <div class="mt-10 flex items-center gap-x-6">
@@ -325,7 +343,7 @@ pub fn add_index(tera: &mut tera::Tera) {
                 return;
             }
             document.getElementById('dec-id').value = "";
-            window.location.href = '/' + id;
+            window.location.href = '/vault/' + id;
         }
 
         function encryptData() {
@@ -350,14 +368,14 @@ pub fn add_index(tera: &mut tera::Tera) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    value: data,
+                    data,
                     validity: valid,
                 })
             }).then((res) => {
                 if (res.status == 200) {
                     res.json().then((data) => {
-                        document.getElementById('enc-url').value = data.data_id;
-                        document.getElementById('enc-key').value = data.key_id;
+                        document.getElementById('enc-url').value = data.id;
+                        document.getElementById('enc-key').value = data.key;
                         document.getElementById('enc-valid').innerHTML = 'Valid for ' + data.valid_for;
                         document.getElementById('progress').classList.add('hidden');
                         document.getElementById('modal-data').classList.remove('hidden');
@@ -402,8 +420,8 @@ pub fn add_index(tera: &mut tera::Tera) {
                 return;
             }
 
-            var clipboard = "ID: " + document.getElementById('enc-url').value + "\nKey: " + document.getElementById('enc-key').value;
-            navigator.clipboard.writeText(clipboard).then(() => toggleDialog(false), () => toggleDialog(false));
+            var data = document.getElementById('enc-url').value + "." + document.getElementById('enc-key').value;
+            navigator.clipboard.writeText(data).then(() => toggleDialog(false), () => toggleDialog(false));
         }
 
         function toggleDialog(show) {
@@ -424,11 +442,10 @@ pub fn add_index(tera: &mut tera::Tera) {
 
 </html>"#;
 
-    tera.add_raw_template("index.html", source)
-        .expect("Failed to add index template");
+    tera.add_raw_template("index.html", source).expect("Failed to add index template");
 }
 
-pub fn add_privacy(tera: &mut tera::Tera) {
+fn add_privacy(tera: &mut tera::Tera) {
     let source = r#"
 <!DOCTYPE html>
 <html lang="en">
@@ -570,11 +587,10 @@ pub fn add_privacy(tera: &mut tera::Tera) {
 
 </html>"#;
 
-    tera.add_raw_template("privacy.html", source)
-        .expect("Failed to add index template");
+    tera.add_raw_template("privacy.html", source).expect("Failed to add index template");
 }
 
-pub fn add_vault(tera: &mut tera::Tera) {
+fn add_vault(tera: &mut tera::Tera) {
     let source = r#"
 <!DOCTYPE html>
 <html lang="en">
@@ -811,6 +827,5 @@ pub fn add_vault(tera: &mut tera::Tera) {
 
 </html>"#;
 
-    tera.add_raw_template("vault.html", source)
-        .expect("Failed to add vault template");
+    tera.add_raw_template("vault.html", source).expect("Failed to add vault template");
 }

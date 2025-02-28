@@ -1,10 +1,7 @@
-use std::sync::Arc;
-
 use tracing::Level;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
-mod core;
-mod handlers;
+mod app;
 mod routes;
 mod server;
 mod tests;
@@ -14,21 +11,14 @@ async fn main() {
     // initialize tracing
     tracing_subscriber::registry()
         .with(tracing_subscriber::EnvFilter::from_default_env().add_directive(Level::INFO.into()))
-        .with(tracing_subscriber::fmt::layer().with_thread_ids(true))
+        .with(tracing_subscriber::fmt::layer().with_thread_ids(true).json().flatten_event(true))
         .init();
 
     // load env
     dotenv::dotenv().ok();
 
-    // initialize app
-    let app = core::app::App::init().await;
-
-    // initialize notifier - used for signaling jobs
-    let notify = Arc::new(tokio::sync::Notify::new());
-
-    // schedule cleaner
-    core::cleaner::schedule_cleaner(app.clone(), notify.clone()).await;
-
     // serve app
-    server::serve(app, notify).await;
+    server::serve().await;
+
+    tracing::info!("Server has stopped.");
 }
