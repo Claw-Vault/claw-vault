@@ -20,13 +20,57 @@
         open: boolean;
         type: "encrypt" | "decrypt";
     } = $props();
+
+    let remaining = $state(15);
+    let timeStarted = $state(false);
+
+    $effect(() => {
+        if (!timeStarted && data !== undefined && !isType<ApiEmpty>(data, "status")) {
+            startTimer();
+        }
+    });
+
+    function startTimer() {
+        if (timeStarted) {
+            return;
+        }
+        timeStarted = true;
+        let timer = 14;
+        let interval = setInterval(() => {
+            if (!open) {
+                clearInterval(interval);
+                return;
+            }
+            remaining = timer;
+            timer--;
+            if (timer < 0) {
+                clearInterval(interval);
+            }
+        }, 1000);
+        setTimeout(() => {
+            if (!open) {
+                return;
+            }
+            open = false;
+            data = undefined;
+            remaining = 0;
+            timeStarted = false;
+        }, 15 * 1000);
+    }
+
+    function resetDialog() {
+        open = false;
+        data = undefined;
+        remaining = 15;
+        timeStarted = false;
+    }
 </script>
 
 <AlertDialog.Root
     bind:open
     onOpenChange={(open) => {
         if (!open) {
-            data = undefined;
+            resetDialog();
         }
     }}
 >
@@ -74,7 +118,7 @@
                 </div>
                 <div class="flex flex-col items-center gap-4">
                     <p class="text-sm">Valid for {data.valid_for}</p>
-                    <p class="text-sm">Dialog will close in</p>
+                    <p class="text-sm">Dialog will close in {remaining} seconds</p>
                 </div>
             </div>
         {:else if isType<DecryptResponse>(data, "data")}
@@ -86,11 +130,10 @@
             </AlertDialog.Header>
             <div class="grid gap-4 py-4">
                 <div class="flex flex-col items-center gap-4">
-                    <label for="data" class="text-right">Data</label>
-                    <Textarea id="data" value={data.data} class="bg-white" />
+                    <Textarea value={data.data} class="bg-white" />
                 </div>
                 <div class="flex flex-col items-center gap-4">
-                    <p class="text-sm">Dialog will close in</p>
+                    <p class="text-sm">Dialog will close in {remaining} seconds</p>
                 </div>
             </div>
         {:else if isType<ApiEmpty>(data, "status")}
@@ -129,12 +172,10 @@
 
                         window.navigator.clipboard.writeText(text).then(
                             () => {
-                                data = undefined;
-                                open = false;
+                                resetDialog();
                             },
                             () => {
-                                data = undefined;
-                                open = false;
+                                resetDialog();
                             },
                         );
                     }}
