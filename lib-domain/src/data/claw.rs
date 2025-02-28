@@ -42,11 +42,15 @@ impl Datastore {
         claw.ok_or_else(|| AppError::new(ErrType::DbError, "Created claw is NONE"))
     }
 
+    /// This function returns the record upon deletion
+    ///
+    /// So if you are able to get record by ID,
+    /// it means that record has been deleted.
     pub async fn get_claw(&self, id: &str) -> AppResult<Option<Claw>> {
         let id = Claw::id(id);
         let claw: Option<Claw> = self
             .db
-            .select(&id)
+            .delete(&id)
             .await
             .map_err(|e| AppError::err(ErrType::DbError, e, "Failed to fetch claw by id"))?;
 
