@@ -17,4 +17,8 @@ COPY --from=builder /app/build .
 EXPOSE 3000
 
 # Start the BUN server
+ENV NODE_ENV=production
+ENV PROTOCOL_HEADER="X-Forwarded-Proto"
+ENV HOST_HEADER="X-Forwarded-Host"
+ENV PORT_HEADER="X-Forwarded-Port"
 CMD ["bun", "--bun", "run", "start"]
