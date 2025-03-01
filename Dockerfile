@@ -6,10 +6,9 @@ COPY . .
 ARG BACKEND_URL
 ARG PROD_ORIGIN
 
-ENV ORIGIN=$PROD_ORIGIN
-ENV NODE_ENV=production
+ENV ENV NODE_ENV=production
 RUN bun --bun install
-RUN bun --bun run build
+RUN ORIGIN=$PROD_ORIGIN bun --bun run build
 
 # Create a smaller image for running the application
 FROM oven/bun:1.2.4
@@ -22,4 +21,4 @@ EXPOSE 3000
 ARG PROD_ORIGIN
 ENV ORIGIN=$PROD_ORIGIN
 ENV NODE_ENV=production
-CMD ["bun", "--bun", "run", "start"]
+CMD ORIGIN=$PROD_ORIGIN bun --bun run start
