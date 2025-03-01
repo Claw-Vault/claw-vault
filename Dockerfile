@@ -14,8 +14,8 @@ FROM oven/bun:1.1
 
 COPY --from=builder /app/build .
 
-ARG BACKEND_URL
 EXPOSE 3000
 
 # Start the BUN server
+ENV ORIGIN=0.0.0.0:3000
 CMD ["bun", "--bun", "run", "start"]
