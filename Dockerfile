@@ -21,4 +21,4 @@ EXPOSE 3000
 ARG PROD_ORIGIN
 ENV ORIGIN=$PROD_ORIGIN
 ENV NODE_ENV=production
-CMD [ "bun", "start" ]
+ENTRYPOINT [ "bun", "build/index.js" ]
