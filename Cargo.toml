@@ -1,6 +1,6 @@
 [package]
 name = "claw-vault"
-version = "0.1.1"
+version = "2.0.0"
 edition = "2021"
 authors = ["Shashank Verma <shashank.verma2002@gmail.com>"]
 license = "MIT"
