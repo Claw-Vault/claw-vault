@@ -37,6 +37,8 @@ impl Service {
 
         let data = vault.decrypt().and_then(|v| v.validate_and_get())?;
 
+        self.ds.delete_claw(claw.id).await?;
+
         Ok(DecryptResponse { data })
     }
 
