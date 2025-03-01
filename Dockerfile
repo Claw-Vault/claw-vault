@@ -1,4 +1,4 @@
-FROM rust:1.85.0-alpine3.19 as builder
+FROM rust:1.85.0-alpine3.21 as builder
 
 WORKDIR /usr/src/app
 COPY . .
@@ -16,7 +16,7 @@ ARG PORT
 RUN cargo install --locked --path .
 
 # Start a new, final image
-FROM alpine:3.19
+FROM alpine:3.21
 
 # Copy the binary from the build stage
 COPY --from=builder /usr/local/cargo/bin/claw-vault /usr/local/bin/claw-vault
