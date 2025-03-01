@@ -1,14 +1,14 @@
 [package]
 name = "claw-vault"
 version = "2.0.0"
-edition = "2021"
+edition = "2024"
 authors = ["Shashank Verma <shashank.verma2002@gmail.com>"]
 license = "MIT"
 description = "A platform to share sensitive information with desired recipients."
 repository = "https://github.com/Claw-Vault"
 readme = "README.md"
 keywords = ["rsa", "xrc", "encryption", "decryption", "vault", "claw", "share"]
-rust-version = "1.83"
+rust-version = "1.85"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,7 +16,7 @@ rust-version = "1.83"
 unsafe_code = "forbid"
 
 [workspace]
-resolver = "2"
+resolver = "3"
 members = ["lib-core", "lib-domain"]
 
 [dependencies]

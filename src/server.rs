@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, sync::Arc};
 
-use axum::{extract::Request, Router};
-use futures::{pin_mut, FutureExt};
+use axum::{Router, extract::Request};
+use futures::{FutureExt, pin_mut};
 use hyper::body::Incoming;
 use hyper_util::{
     rt::{TokioExecutor, TokioIo},

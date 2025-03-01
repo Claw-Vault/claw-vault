@@ -1,5 +1,5 @@
 use axum::extract::{Path, State};
-use axum::{http::StatusCode, Extension};
+use axum::{Extension, http::StatusCode};
 use lib_core::interceptor::ReqId;
 use lib_core::{ApiResponse, EmptyResponse, Json};
 use lib_domain::dto::vault::req::{DecryptRequest, EncryptRequest};
