@@ -17,5 +17,5 @@ COPY --from=builder /app/build .
 EXPOSE 3000
 
 # Start the BUN server
-ENV ORIGIN=0.0.0.0:3000
+ENV ORIGIN=0.0.0.0:8080
 CMD ["bun", "--bun", "run", "start"]
