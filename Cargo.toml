@@ -1,6 +1,6 @@
 [package]
 name = "claw-vault"
-version = "0.1.1"
+version = "2.0.0"
 edition = "2021"
 authors = ["Shashank Verma <shashank.verma2002@gmail.com>"]
 license = "MIT"
@@ -46,8 +46,6 @@ validator = { workspace = true }
 utoipa = { workspace = true }
 utoipa-swagger-ui = { workspace = true }
 
-tera = { workspace = true }
-
 [workspace.dependencies]
 # rt
 futures = "=0.3.30"
@@ -78,8 +76,6 @@ utoipa-swagger-ui = { version = "=8.0.0", features = ["axum"] }
 # db
 surrealdb = "=2.2.1"
 chrono = "=0.4.39"
-
-tera = "1.19.1"
 
 [profile.release]
 strip = true
