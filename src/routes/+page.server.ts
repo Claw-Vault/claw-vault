@@ -1,5 +1,6 @@
 import type { ApiEmpty } from "$lib/api/models/empty";
 import { decryptClawApi, encryptClawApi } from "$lib/api/vault.server";
+import { isType } from "$lib/utils";
 import { fail, type Actions } from "@sveltejs/kit";
 
 export const actions: Actions = {
@@ -16,7 +17,7 @@ export const actions: Actions = {
             const res = await encryptClawApi(data, validity);
             return { ...res };
         } catch (e) {
-            let err = e as ApiEmpty;
+            let err = isType<ApiEmpty>(e, "status") ? e as ApiEmpty : { status: 500, message: `${e}` } as ApiEmpty;
             return fail(err.status, { ...err });
         }
     },
@@ -35,7 +36,7 @@ export const actions: Actions = {
             const res = await decryptClawApi(id, key);
             return { ...res };
         } catch (e) {
-            let err = e as ApiEmpty;
+            let err = isType<ApiEmpty>(e, "status") ? e as ApiEmpty : { status: 500, message: `${e}` } as ApiEmpty;
             return fail(err.status, { ...err });
         }
     },
