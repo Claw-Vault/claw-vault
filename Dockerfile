@@ -14,8 +14,8 @@ ARG ASSETS_DIR
 ARG PORT
 
 # Build the application
-RUN cargo test --release
-RUN cargo install --path .
+# RUN cargo test --release
+RUN cargo install --locked --path .
 
 # Start a new, final image
 FROM alpine:3.19
