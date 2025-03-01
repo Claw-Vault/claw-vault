@@ -4,7 +4,9 @@ WORKDIR /app
 COPY . .
 
 ARG BACKEND_URL
+ARG PROD_ORIGIN
 
+ENV ORIGIN=$PROD_ORIGIN
 ENV NODE_ENV=production
 RUN bun --bun install
 RUN bun --bun run build
@@ -17,6 +19,8 @@ COPY --from=builder /app/build .
 EXPOSE 3000
 
 # Start the BUN server
+ARG PROD_ORIGIN
+ENV ORIGIN=$PROD_ORIGIN
 ENV NODE_ENV=production
 ENV PROTOCOL_HEADER="X-Forwarded-Proto"
 ENV HOST_HEADER="X-Forwarded-Host"
