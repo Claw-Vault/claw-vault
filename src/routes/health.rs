@@ -1,4 +1,4 @@
-use axum::routing::{get, Router};
+use axum::routing::{Router, get};
 
 use crate::app::App;
 
@@ -7,7 +7,7 @@ pub fn bind_routes() -> Router<App> {
 }
 
 #[utoipa::path(
-    get, 
+    get,
     path = "/health",
     responses((status=200, description="Health check API")),
     tag = "Health"

@@ -3,10 +3,10 @@ use std::sync::Arc;
 use claw::Claw;
 use lib_core::config::Config;
 use surrealdb::{
+    RecordId, Surreal,
     engine::remote::ws::{Client, Ws, Wss},
     opt::auth::Root,
     sql::Id,
-    RecordId, Surreal,
 };
 
 mod claw;

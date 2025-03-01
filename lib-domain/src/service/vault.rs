@@ -1,6 +1,6 @@
 use lib_core::{
-    vault::{EData, Vault},
     AppError, AppResult, ErrType,
+    vault::{EData, Vault},
 };
 
 use crate::dto::vault::{

@@ -109,7 +109,7 @@ impl Vault<EncryptClaw> {
                     ErrType::VaultError,
                     err,
                     "Failed to generate RSA key-pair",
-                ))
+                ));
             }
         };
 

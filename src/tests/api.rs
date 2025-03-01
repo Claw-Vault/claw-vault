@@ -1,6 +1,6 @@
 use axum::{
     body::{Body, Bytes},
-    http::{header, Method, Request, Response, StatusCode},
+    http::{Method, Request, Response, StatusCode, header},
 };
 use http_body_util::BodyExt;
 use tower::util::ServiceExt;
@@ -111,9 +111,8 @@ where
         Err(_) => return String::from("<nil>"),
     };
 
-    if let Ok(b) = String::from_utf8(bytes.to_vec()) {
-        b
-    } else {
-        String::from("<nil>")
+    match String::from_utf8(bytes.to_vec()) {
+        Ok(b) => b,
+        _ => String::from("<nil>"),
     }
 }
