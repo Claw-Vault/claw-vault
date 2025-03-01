@@ -17,6 +17,6 @@ COPY --from=builder /app/build .
 EXPOSE 3000
 
 # Start the BUN server
-ARG PROD_ORIGIN
-ENV ORIGIN=$PROD_ORIGIN
+ENV PROTOCOL_HEADER=x-forwarded-proto
+ENV HOST_HEADER=x-forwarded-host
 CMD ["bun", "--bun", "run", "start"]
