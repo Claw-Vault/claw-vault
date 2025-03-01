@@ -16,7 +16,7 @@ rust-version = "1.85"
 unsafe_code = "forbid"
 
 [workspace]
-resolver = "2"
+resolver = "3"
 members = ["lib-core", "lib-domain"]
 
 [dependencies]
