@@ -1,10 +1,10 @@
-use std::{error::Error, fmt::Display, sync::Arc};
+use std::{error::Error, fmt::Display};
 
 use axum::{
     async_trait,
     extract::{rejection::JsonRejection, FromRequest, Request},
     http::StatusCode,
-    response::{Html, IntoResponse, Response},
+    response::{IntoResponse, Response},
 };
 use interceptor::ReqId;
 use serde::Serialize;
@@ -14,7 +14,6 @@ use validator::Validate;
 pub mod config;
 pub mod enums;
 pub mod interceptor;
-pub mod tera_template;
 pub mod vault;
 
 #[derive(Serialize, ToSchema)]
@@ -73,29 +72,6 @@ where
         })?;
 
         Ok(Json(payload))
-    }
-}
-
-/// Struct for rendering html templates
-pub struct HtmlTemplate {
-    pub tera: Arc<tera::Tera>,
-    pub template: &'static str,
-    pub status: Option<StatusCode>,
-    pub ctx: Option<tera::Context>,
-}
-
-impl IntoResponse for HtmlTemplate {
-    /// Function to render the provided template
-    fn into_response(self) -> Response {
-        let HtmlTemplate { tera, template: name, status, ctx } = self;
-        let ctx = ctx.unwrap_or(tera::Context::new());
-
-        let status_code = status.unwrap_or(StatusCode::OK);
-
-        match tera.render(name, &ctx) {
-            Ok(html) => (status_code, Html(html)).into_response(),
-            Err(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()).into_response(),
-        }
     }
 }
 

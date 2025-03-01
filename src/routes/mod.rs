@@ -6,16 +6,13 @@ use crate::app::App;
 pub(crate) mod fallback;
 mod health;
 mod vault;
-mod web;
 
 /// Function to bind routes from:
 /// - [`health`]
 /// - [`vault`]
-/// - [`web`]
 pub fn bind_routes(router: Router<App>) -> Router<App> {
     // root level routes
     let r = health::bind_routes();
-    let r = web::bind_routes(r);
 
     // api level routes
     let vault_routes = vault::bind_routes(Router::new());

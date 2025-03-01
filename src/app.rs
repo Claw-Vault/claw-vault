@@ -8,7 +8,6 @@ use lib_domain::service::Service;
 /// This struct is passed on to every API path.
 pub struct _App {
     service: Service,
-    tera: Arc<tera::Tera>,
 }
 
 impl _App {
@@ -17,9 +16,7 @@ impl _App {
     /// Returns [`_App`]
     pub async fn init() -> Self {
         let service = Service::init().await;
-        let tera = lib_core::tera_template::setup_tera();
-        let tera = Arc::new(tera);
-        Self { service, tera }
+        Self { service }
     }
 
     pub async fn bootstrap(&self) {
@@ -29,10 +26,6 @@ impl _App {
 
     pub fn service(&self) -> &Service {
         &self.service
-    }
-
-    pub fn tera(&self) -> Arc<tera::Tera> {
-        self.tera.clone()
     }
 }
 
