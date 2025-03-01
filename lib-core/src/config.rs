@@ -17,12 +17,4 @@ impl Config {
     pub fn get_db_pass() -> String {
         std::env::var("DATABASE_PASS").expect("Missing db pass")
     }
-
-    pub fn get_assets_dir() -> String {
-        std::env::var("ASSETS_DIR").expect("Missing assets dir")
-    }
-
-    pub fn get_template_dir() -> String {
-        std::env::var("TEMPLATE_DIR").expect("Missing template dir")
-    }
 }
