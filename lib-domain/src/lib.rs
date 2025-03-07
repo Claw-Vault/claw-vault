@@ -1,3 +1,3 @@
-pub mod data;
+pub mod datastore;
 pub mod dto;
 pub mod service;

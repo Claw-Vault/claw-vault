@@ -19,7 +19,7 @@ impl Service {
 
         let claw = self.ds.save_claw(encrypted, e_pem, hash, validity).await?;
 
-        Ok(EncryptResponse { id: claw.id.key().to_string(), key, valid_for: validity.to_string() })
+        Ok(EncryptResponse { id: claw.id, key, valid_for: validity.to_string() })
     }
 
     pub async fn decrypt_data(&self, dto: DecryptRequest) -> AppResult<DecryptResponse> {
@@ -37,7 +37,7 @@ impl Service {
 
         let data = vault.decrypt().and_then(|v| v.validate_and_get())?;
 
-        self.ds.delete_claw(claw.id).await?;
+        self.ds.delete_claw(&claw.id).await?;
 
         Ok(DecryptResponse { data })
     }

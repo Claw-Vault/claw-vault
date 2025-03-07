@@ -65,3 +65,13 @@ impl utoipa::PartialSchema for ValidDuration {
             .into()
     }
 }
+
+impl From<i64> for ValidDuration {
+    fn from(value: i64) -> Self {
+        match value {
+            900 => Self::QuarterHour,
+            1800 => Self::HalfHour,
+            _ => Self::Minute,
+        }
+    }
+}

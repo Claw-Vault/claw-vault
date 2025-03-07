@@ -1,4 +1,4 @@
-use crate::data::Datastore;
+use crate::datastore::Datastore;
 
 mod vault;
 

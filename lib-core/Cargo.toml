@@ -16,7 +16,7 @@ validator = { workspace = true }
 
 # utils
 backtrace = "=0.3.73"
-nanoid = "=0.4.0"
+nanoid = { workspace = true }
 
 # swagger
 utoipa = { workspace = true }
@@ -29,4 +29,5 @@ base64 = "=0.22.1"
 hex = "=0.4.3"
 xor_cryptor = "=2.0.4"
 
+sqlx = { workspace = true }
 chrono = { workspace = true }
