@@ -11,10 +11,6 @@ ARG DATABASE_USER
 ARG DATABASE_PASS
 ARG PORT
 
-ENV DATABASE_URL=$DATABASE_URL
-RUN cargo install sqlx-cli
-RUN sqlx db create
-
 # Build the application
 # RUN cargo test --release
 RUN cargo install --locked --path .

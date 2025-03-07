@@ -39,8 +39,8 @@ impl Datastore {
     }
 
     async fn __cleaner_job(db: &sqlx::SqlitePool) {
-        let claws =
-            sqlx::query_as!(Claw, r#"SELECT * FROM claw"#).fetch_all(db).await.unwrap_or(vec![]);
+        let claws: Vec<Claw> =
+            sqlx::query_as(r#"SELECT * FROM claw"#).fetch_all(db).await.unwrap_or(vec![]);
 
         for claw in claws.into_iter() {
             let time = chrono::Utc::now().timestamp_millis();
