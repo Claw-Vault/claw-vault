@@ -11,6 +11,7 @@ ARG DATABASE_USER
 ARG DATABASE_PASS
 ARG PORT
 
+ENV DATABASE_URL=$DATABASE_URL
 RUN cargo install sqlx-cli
 RUN sqlx db create
 
