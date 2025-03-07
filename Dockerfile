@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 COPY . .
 
 # Install build dependencies
-RUN apk add --no-cache musl-dev perl-utils make curl make pkgconf
+RUN apk add --no-cache musl-dev perl-utils make curl make pkgconf openssl-sys
 
 ARG DATABASE_URL
 ARG DATABASE_USER
