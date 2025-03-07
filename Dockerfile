@@ -11,6 +11,9 @@ ARG DATABASE_USER
 ARG DATABASE_PASS
 ARG PORT
 
+RUN cargo install sqlx-cli
+RUN sqlx db create
+
 # Build the application
 # RUN cargo test --release
 RUN cargo install --locked --path .
