@@ -47,18 +47,14 @@ where
 {
     /// Encodes array to base64 [`String`]
     fn encode_string(&self, buf: &[u8]) -> String {
-        let mut encoded_string = String::new();
-        base64::engine::general_purpose::STANDARD.encode_string(buf, &mut encoded_string);
-        encoded_string
+        base64::engine::general_purpose::STANDARD.encode(buf)
     }
 
     /// Decode base64 array to [`Vec<u8>`]
     fn decode_string(&self, buf: &[u8]) -> AppResult<Vec<u8>> {
-        let mut decoded = Vec::<u8>::new();
-        match base64::engine::general_purpose::STANDARD.decode_vec(buf, &mut decoded) {
-            Ok(_) => Ok(decoded),
-            Err(err) => Err(AppError::err(ErrType::VaultError, err, "Error decoding base64")),
-        }
+        base64::engine::general_purpose::STANDARD
+            .decode(buf)
+            .map_err(|err| AppError::err(ErrType::VaultError, err, "Error decoding base64"))
     }
 
     /// Generates [`sha::sha256`] hash for the data
@@ -68,7 +64,7 @@ where
 }
 
 impl Vault<Init> {
-    pub fn new() -> Vault<IdHashClaw> {
+    pub fn cipher() -> Vault<IdHashClaw> {
         Vault {
             hash: String::default(),
             key: String::default(),
@@ -78,7 +74,7 @@ impl Vault<Init> {
         }
     }
 
-    pub fn new_dec(EData { hash, key, encrypted, e_pem }: EData) -> Vault<DecryptClaw> {
+    pub fn decipher(EData { hash, key, encrypted, e_pem }: EData) -> Vault<DecryptClaw> {
         Vault { hash, key, data: encrypted, e_pem, _marker: PhantomData }
     }
 }

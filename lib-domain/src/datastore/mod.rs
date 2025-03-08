@@ -21,7 +21,7 @@ impl Datastore {
         let db = sqlx::SqlitePool::connect_with(opts).await.expect("Failed init Sqlite pool");
         tracing::info!("Database connected");
 
-        sqlx::migrate!().run(&db).await.expect("Failed to run migrations");
+        sqlx::migrate!("./migrations").run(&db).await.expect("Failed to run migrations");
         tracing::info!("Migrations ran");
 
         Self { db }

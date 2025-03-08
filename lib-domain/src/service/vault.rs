@@ -15,7 +15,7 @@ impl Service {
         let validity = dto.validity;
 
         let EData { hash, key, encrypted, e_pem } =
-            Vault::new().generate_hash(dto.data).encrypt()?;
+            Vault::cipher().generate_hash(dto.data).encrypt()?;
 
         let claw = self.ds.save_claw(encrypted, e_pem, hash, validity).await?;
 
@@ -28,7 +28,7 @@ impl Service {
                 AppError::new(ErrType::NotFound, "Claw not found for requested ID")
             })?;
 
-        let vault = Vault::new_dec(EData {
+        let vault = Vault::decipher(EData {
             hash: claw.sha256,
             key: dto.key,
             encrypted: claw.data,
