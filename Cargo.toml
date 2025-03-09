@@ -74,7 +74,7 @@ utoipa = { version = "=5.0.0", features = ["axum_extras"] }
 utoipa-swagger-ui = { version = "=8.0.0", features = ["axum"] }
 
 # db
-sqlx = { version = "=0.8.3", features = ["runtime-tokio", "macros", "sqlite"] }
+sqlx = { version = "=0.8.3", features = ["runtime-tokio", "macros", "postgres"] }
 chrono = "=0.4.39"
 
 nanoid = "=0.4.0"

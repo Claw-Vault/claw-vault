@@ -9,7 +9,7 @@ pub enum ValidDuration {
 
 impl ValidDuration {
     /// Returns duration in seconds
-    pub fn get_duration(&self) -> i16 {
+    pub fn get_duration(&self) -> i32 {
         match self {
             ValidDuration::Minute => 60,
             ValidDuration::QuarterHour => 900,
@@ -33,7 +33,7 @@ impl Serialize for ValidDuration {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_i16(self.get_duration())
+        serializer.serialize_i32(self.get_duration())
     }
 }
 impl<'de> Deserialize<'de> for ValidDuration {
@@ -66,8 +66,8 @@ impl utoipa::PartialSchema for ValidDuration {
     }
 }
 
-impl From<i64> for ValidDuration {
-    fn from(value: i64) -> Self {
+impl From<i32> for ValidDuration {
+    fn from(value: i32) -> Self {
         match value {
             900 => Self::QuarterHour,
             1800 => Self::HalfHour,

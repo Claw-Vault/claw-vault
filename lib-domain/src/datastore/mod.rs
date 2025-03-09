@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use claw::Claw;
 use lib_core::config::Config;
 
@@ -8,17 +6,16 @@ mod claw;
 const RECUR_SPAN_SEC: u64 = 30;
 
 pub struct Datastore {
-    db: sqlx::SqlitePool,
+    db: sqlx::PgPool,
 }
 
 impl Datastore {
     pub async fn init() -> Self {
-        let opts = sqlx::sqlite::SqliteConnectOptions::from_str(&Config::get_db_url())
-            .expect("Failed to init sqlit connection options")
-            .journal_mode(sqlx::sqlite::SqliteJournalMode::Wal)
-            .create_if_missing(true);
-
-        let db = sqlx::SqlitePool::connect_with(opts).await.expect("Failed init Sqlite pool");
+        let db = sqlx::postgres::PgPoolOptions::new()
+            .max_connections(1024)
+            .connect(&Config::get_db_url())
+            .await
+            .expect("Failed init PgPool");
         tracing::info!("Database connected");
 
         sqlx::migrate!("./migrations").run(&db).await.expect("Failed to run migrations");
@@ -38,7 +35,7 @@ impl Datastore {
         });
     }
 
-    async fn __cleaner_job(db: &sqlx::SqlitePool) {
+    async fn __cleaner_job(db: &sqlx::PgPool) {
         let claws: Vec<Claw> =
             sqlx::query_as(r#"SELECT * FROM claw"#).fetch_all(db).await.unwrap_or(vec![]);
 

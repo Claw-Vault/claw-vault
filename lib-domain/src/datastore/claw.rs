@@ -14,14 +14,14 @@ pub struct Claw {
     pub validity: ValidDuration,
 }
 
-impl<'r> sqlx::FromRow<'r, sqlx::sqlite::SqliteRow> for Claw {
-    fn from_row(row: &'r sqlx::sqlite::SqliteRow) -> Result<Self, sqlx::Error> {
+impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Claw {
+    fn from_row(row: &'r sqlx::postgres::PgRow) -> Result<Self, sqlx::Error> {
         let id: String = row.try_get("id")?;
         let expiry_at: i64 = row.try_get("expiry_at")?;
         let data: String = row.try_get("data")?;
         let pem: String = row.try_get("pem")?;
         let sha256: String = row.try_get("sha256")?;
-        let validity: i64 = row.try_get("validity")?;
+        let validity: i32 = row.try_get("validity")?;
         let validity: ValidDuration = validity.into();
 
         Ok(Claw { id, expiry_at, data, pem, sha256, validity })
@@ -82,7 +82,7 @@ impl Datastore {
     }
 
     pub(super) async fn __delete_claw(
-        db: &sqlx::SqlitePool,
+        db: &sqlx::PgPool,
         id: &str,
     ) -> Result<Option<()>, sqlx::Error> {
         let res = sqlx::query(r#"DELETE FROM claw WHERE id = $1"#).bind(id).execute(db).await;

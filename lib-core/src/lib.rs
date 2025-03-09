@@ -212,7 +212,7 @@ where
                     ErrType::NotFound => StatusCode::NOT_FOUND,
                     ErrType::ServerError => StatusCode::INTERNAL_SERVER_ERROR,
                     ErrType::DbError => StatusCode::INTERNAL_SERVER_ERROR,
-                    ErrType::VaultError => StatusCode::INTERNAL_SERVER_ERROR,
+                    ErrType::VaultError => StatusCode::BAD_REQUEST,
                     ErrType::ValidationErr => StatusCode::BAD_REQUEST,
                     ErrType::TooManyRequests => StatusCode::TOO_MANY_REQUESTS,
                 };

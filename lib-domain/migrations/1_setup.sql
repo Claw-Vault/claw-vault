@@ -1,10 +1,10 @@
-CREATE TABLE IF NOT EXISTS claw (
-    id TEXT NOT NULL,
-    expiry_at INTEGER NOT NULL,
-    data TEXT NOT NULL,
-    pem TEXT NOT NULL,
-    sha256 TEXT NOT NULL,
-    validity INTEGER NOT NULL,
-
-    PRIMARY KEY (id)
+create table claw
+(
+    id        text    not null
+        primary key,
+    expiry_at bigint  not null,
+    data      text    not null,
+    pem       text    not null,
+    sha256    text    not null,
+    validity  integer not null
 );
