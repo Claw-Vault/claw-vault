@@ -7,12 +7,10 @@ COPY . .
 RUN apk add --no-cache musl-dev perl-utils make curl make pkgconf openssl-dev openssl-libs-static
 
 ARG DATABASE_URL
-ARG DATABASE_USER
-ARG DATABASE_PASS
 ARG PORT
 
 # Build the application
-# RUN cargo test --release
+RUN cargo test
 RUN cargo install --locked --path .
 
 # Start a new, final image

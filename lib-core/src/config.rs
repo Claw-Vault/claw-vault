@@ -9,8 +9,4 @@ impl Config {
     pub fn get_db_url() -> String {
         std::env::var("DATABASE_URL").expect("Missing db url")
     }
-
-    pub fn get_migrations_path() -> String {
-        std::env::var("DB_MIGRATION_PATH").expect("Missing db migration path")
-    }
 }
