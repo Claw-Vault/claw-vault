@@ -1,7 +1,8 @@
-/target
-*.lock
-*.idea
-.env
+**/target
+**/.lock
+**/.idea
+**/.env
+**/.sqlx
 
 **/.DS_Store
-data
+**/data
