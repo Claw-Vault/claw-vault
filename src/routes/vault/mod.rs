@@ -9,5 +9,5 @@ pub fn bind_routes(router: Router<App>) -> Router<App> {
     router
         .route("/encrypt", post(api::encrypt))
         .route("/decrypt", post(api::decrypt))
-        .route("/claw/:id", get(api::has_claw))
+        .route("/claw/{id}", get(api::has_claw))
 }

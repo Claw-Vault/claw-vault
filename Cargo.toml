@@ -49,33 +49,37 @@ utoipa-swagger-ui = { workspace = true }
 [workspace.dependencies]
 # rt
 futures = "=0.3.30"
-tokio = { version = "=1.42.0", features = ["full", "rt-multi-thread"] }
+tokio = { version = "=1.44.1", features = ["full", "rt-multi-thread"] }
 
 # http
-hyper = "=1.5.0"
-hyper-util = { version = "=0.1.9", features = [
+hyper = "=1.6.0"
+hyper-util = { version = "=0.1.10", features = [
     "tokio",
     "server-auto",
     "http1",
 ] }
-axum = { version = "=0.7.7", features = ["macros", "multipart"] }
-tower-http = { version = "=0.6.1", features = ["fs", "trace"] }
-tower = { version = "=0.5.1", features = ["util"] }
+axum = { version = "=0.8.1", features = ["macros", "multipart"] }
+tower-http = { version = "=0.6.2", features = ["fs", "trace"] }
+tower = { version = "=0.5.2", features = ["util"] }
 tracing = "=0.1.40"
 tracing-subscriber = { version = "=0.3", features = ["env-filter", "json"] }
 
 # dto
-serde = { version = "=1.0.210", features = ["derive"] }
-serde_json = { version = "=1.0.128" }
-validator = { version = "=0.18.1", features = ["derive"] }
+serde = { version = "=1.0.219", features = ["derive"] }
+serde_json = { version = "=1.0.140" }
+validator = { version = "=0.20.0", features = ["derive"] }
 
 # swagger
-utoipa = { version = "=5.0.0", features = ["axum_extras"] }
-utoipa-swagger-ui = { version = "=8.0.0", features = ["axum"] }
+utoipa = { version = "=5.3.1", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "=9.0.0", features = ["axum"] }
 
 # db
-sqlx = { version = "=0.8.3", features = ["runtime-tokio", "macros", "postgres"] }
-chrono = "=0.4.39"
+sqlx = { version = "=0.8.3", features = [
+    "runtime-tokio",
+    "macros",
+    "postgres",
+] }
+chrono = "=0.4.40"
 
 nanoid = "=0.4.0"
 
@@ -85,4 +89,4 @@ strip = true
 
 [dev-dependencies]
 tower = { version = "0.4.13", features = ["util"] }
-http-body-util = "=0.1.2"
+http-body-util = "=0.1.3"

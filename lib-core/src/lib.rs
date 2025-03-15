@@ -1,7 +1,6 @@
 use std::{error::Error, fmt::Display};
 
 use axum::{
-    async_trait,
     extract::{FromRequest, Request, rejection::JsonRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -45,7 +44,6 @@ where
 /// Custom Json wrapper handling json payload
 ///
 /// Struct being extract must have [`serde::Deserialize`] and [`validator::Validate`] to validate the payload
-#[async_trait]
 impl<S, T> FromRequest<S> for Json<T>
 where
     axum::Json<T>: FromRequest<S, Rejection = JsonRejection>,
