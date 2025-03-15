@@ -2,11 +2,15 @@
 name = "lib-domain"
 version = "2.0.0"
 edition = "2024"
+build = true
 
 [dependencies]
 lib-core = { path = "../lib-core" }
 tokio = { workspace = true }
 tracing = { workspace = true }
+
+tonic = { workspace = true }
+prost = { workspace = true }
 
 sqlx = { workspace = true }
 chrono = { workspace = true }
@@ -18,3 +22,6 @@ validator = { workspace = true }
 utoipa = { workspace = true }
 
 nanoid = { workspace = true }
+
+[build-dependencies]
+tonic-build = "=0.12.3"

@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package claw_proto;
+
+message EncryptRequest {
+    string data     = 1;
+    int32  validity = 2;
+}
+
+message EncryptResponse {
+    string id        = 1;
+    string key       = 2;
+    string valid_for = 3;
+}
+
+message DecryptRequest {
+    string id  = 1;
+    string key = 2;
+}
+
+message DecryptResponse {
+    string data = 1;
+}
+
+service ClawVault {
+    rpc EncryptData(EncryptRequest) returns (EncryptResponse) {}
+    rpc DecryptData(DecryptRequest) returns (DecryptResponse) {}
+}

@@ -24,6 +24,11 @@ impl Datastore {
         Self { db }
     }
 
+    pub async fn close(&self) {
+        self.db.close().await;
+        tracing::info!("PgPool connection closed.");
+    }
+
     pub async fn schedule_cleaner(&self) {
         let db = self.db.clone();
 

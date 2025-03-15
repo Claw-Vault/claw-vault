@@ -15,4 +15,8 @@ impl Service {
     pub fn ds(&self) -> &Datastore {
         &self.ds
     }
+
+    pub async fn close(&self) {
+        self.ds.close().await
+    }
 }

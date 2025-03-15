@@ -21,8 +21,12 @@ impl<'r> sqlx::FromRow<'r, sqlx::postgres::PgRow> for Claw {
         let data: String = row.try_get("data")?;
         let pem: String = row.try_get("pem")?;
         let sha256: String = row.try_get("sha256")?;
-        let validity: i32 = row.try_get("validity")?;
-        let validity: ValidDuration = validity.into();
+        let validity = ValidDuration::from(row.try_get("validity")?).ok_or_else(|| {
+            sqlx::Error::ColumnDecode {
+                index: "validity".into(),
+                source: Box::from("Invalid value of validity"),
+            }
+        })?;
 
         Ok(Claw { id, expiry_at, data, pem, sha256, validity })
     }

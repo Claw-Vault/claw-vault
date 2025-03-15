@@ -17,6 +17,15 @@ impl ValidDuration {
         }
     }
 
+    pub fn from(v: i32) -> Option<Self> {
+        match v {
+            60 => Some(ValidDuration::Minute),
+            900 => Some(ValidDuration::QuarterHour),
+            1800 => Some(ValidDuration::HalfHour),
+            _ => None,
+        }
+    }
+
     /// Returns human readable string
     pub fn to_string(&self) -> String {
         match self {
@@ -63,15 +72,5 @@ impl utoipa::PartialSchema for ValidDuration {
             .enum_values::<[i16; 3usize], i16>(Some([60, 900, 1800]))
             .description(Some("Supported valid durations"))
             .into()
-    }
-}
-
-impl From<i32> for ValidDuration {
-    fn from(value: i32) -> Self {
-        match value {
-            900 => Self::QuarterHour,
-            1800 => Self::HalfHour,
-            _ => Self::Minute,
-        }
     }
 }

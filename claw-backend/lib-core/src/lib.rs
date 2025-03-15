@@ -1,7 +1,6 @@
 use std::{error::Error, fmt::Display};
 
 use axum::{
-    async_trait,
     extract::{FromRequest, Request, rejection::JsonRejection},
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -45,7 +44,6 @@ where
 /// Custom Json wrapper handling json payload
 ///
 /// Struct being extract must have [`serde::Deserialize`] and [`validator::Validate`] to validate the payload
-#[async_trait]
 impl<S, T> FromRequest<S> for Json<T>
 where
     axum::Json<T>: FromRequest<S, Rejection = JsonRejection>,
@@ -77,10 +75,8 @@ where
 
 #[derive(Debug)]
 pub enum ErrType {
-    Unauthorized,
     BadRequest,
     NotFound,
-    ServerError,
     DbError,
     VaultError,
     ValidationErr,
@@ -93,10 +89,8 @@ impl Display for ErrType {
             f,
             "{}",
             match self {
-                ErrType::Unauthorized => "Unauthorized",
                 ErrType::BadRequest => "BadRequest",
                 ErrType::NotFound => "NotFound",
-                ErrType::ServerError => "ServerError",
                 ErrType::DbError => "DbError",
                 ErrType::VaultError => "VaultError",
                 ErrType::ValidationErr => "ValidationErr",
@@ -164,6 +158,21 @@ impl AppError {
     }
 }
 
+impl From<AppError> for tonic::Status {
+    fn from(value: AppError) -> Self {
+        let message = format!("[{}]: {}", value._type, value.message);
+        match value._type {
+            ErrType::BadRequest => tonic::Status::invalid_argument(message),
+            ErrType::NotFound => tonic::Status::not_found(message),
+            ErrType::DbError => tonic::Status::internal(message),
+            ErrType::VaultError => tonic::Status::internal(message),
+            ErrType::ValidationErr => tonic::Status::invalid_argument(message),
+            ErrType::InvalidBody => tonic::Status::invalid_argument(message),
+            ErrType::TooManyRequests => tonic::Status::resource_exhausted(message),
+        }
+    }
+}
+
 // impl From<(surrealdb::Error, &str)> for AppError {
 //     fn from((err, msg): (surrealdb::Error, &str)) -> Self {
 //         AppError::init(ErrType::DbError, Some(Box::new(err)), msg)
@@ -171,6 +180,8 @@ impl AppError {
 // }
 
 pub type AppResult<T> = Result<T, AppError>;
+
+pub type RpcResult<T> = Result<tonic::Response<T>, tonic::Status>;
 
 pub enum ApiResponse<T> {
     Ok(T),
@@ -207,10 +218,8 @@ where
 
                 let status = match _type {
                     ErrType::InvalidBody => StatusCode::BAD_REQUEST,
-                    ErrType::Unauthorized => StatusCode::UNAUTHORIZED,
                     ErrType::BadRequest => StatusCode::BAD_REQUEST,
                     ErrType::NotFound => StatusCode::NOT_FOUND,
-                    ErrType::ServerError => StatusCode::INTERNAL_SERVER_ERROR,
                     ErrType::DbError => StatusCode::INTERNAL_SERVER_ERROR,
                     ErrType::VaultError => StatusCode::BAD_REQUEST,
                     ErrType::ValidationErr => StatusCode::BAD_REQUEST,

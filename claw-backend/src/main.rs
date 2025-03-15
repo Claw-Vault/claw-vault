@@ -4,7 +4,6 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 mod app;
 mod routes;
 mod server;
-mod tests;
 
 #[tokio::main(flavor = "multi_thread")]
 async fn main() {

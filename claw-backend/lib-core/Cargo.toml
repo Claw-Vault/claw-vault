@@ -7,6 +7,8 @@ edition = "2024"
 tokio = { workspace = true }
 
 # http
+http = "=1.2.0"
+tonic = { workspace = true }
 axum = { workspace = true }
 tracing = { workspace = true }
 

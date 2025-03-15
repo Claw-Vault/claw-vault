@@ -27,6 +27,10 @@ impl _App {
     pub fn service(&self) -> &Service {
         &self.service
     }
+
+    pub async fn close(&self) {
+        self.service.close().await
+    }
 }
 
 pub type App = Arc<_App>;
